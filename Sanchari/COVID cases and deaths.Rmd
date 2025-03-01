@@ -1,0 +1,129 @@
+---
+title: "BIS 15 project"
+output: html_document
+date: "2025-03-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(naniar)
+```
+
+```{r}
+COVID_Cases <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/covid_confirmed_usafacts.csv")
+COVID_Deaths <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/covid_deaths_usafacts.csv")
+```
+
+```{r}
+COVID_Cases_long <- COVID_Cases %>% 
+  pivot_longer(-c(countyFIPS, County.Name, State, StateFIPS),names_to = "Date", values_to = "Cases")
+```
+
+```{r}
+COVID_Cases_long %>% 
+  group_by(State) %>% 
+  summarise(total_affected=sum(Cases, na.rm = T)) %>% 
+  arrange(-total_affected)
+```
+
+```{r}
+COVID_Cases_long %>% 
+  group_by(State) %>% 
+  summarise(total_affected=sum(Cases, na.rm = T)) %>% 
+  arrange(-total_affected) %>% 
+  top_n(10, total_affected) %>%
+  ggplot(aes(x=reorder(State, total_affected), y=total_affected, fill = State))+geom_col()+theme(axis.text.x = element_text(angle = 0, hjust = 0.4))+coord_flip()
+```
+
+```{r}
+COVID_Cases_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
+  summarise(average_affected=mean(Cases, na.rm = T), .groups = "keep") %>% 
+
+  ggplot(aes(x=Date, y=average_affected, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Cases in the Ten Most Affected States", x="Time", y="Average Cases")
+```
+
+```{r}
+COVID_Deaths_long <- COVID_Deaths %>% 
+  pivot_longer(-c(countyFIPS, County.Name, State, StateFIPS),names_to = "Date", values_to = "Deaths")
+```
+
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State) %>% 
+  summarise(total_deaths=sum(Deaths, na.rm = T)) %>% 
+  arrange(-total_deaths)
+```
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State) %>% 
+  summarise(total_deaths=sum(Deaths, na.rm = T)) %>% 
+  arrange(-total_deaths) %>% 
+top_n(10, total_deaths) %>%
+  ggplot(aes(x=reorder(State, total_deaths), y=total_deaths, fill = State))+geom_col()+theme(axis.text.x = element_text(angle = 0, hjust = 0.4))+coord_flip()+labs(title = "COVID-19 Cases in the Ten Most Affected States", x="Time", y="Average Cases")
+```
+
+
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="FL"|State=="GA"|State=="IL"|State=="MI"|State=="NJ"|State=="NY"|State=="OH"|State=="PA"|State=="TX") %>% 
+  summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
+  arrange(-average_deaths) %>% 
+  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths in the US by States", x="Time", y="Average Deaths")
+```
+
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
+  summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
+  arrange(-average_deaths) %>% 
+  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
+```
+
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
+ # summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
+ # arrange(-average_deaths) %>% 
+  ggplot(aes(x=Date, y=Deaths, group = State, colour = State))+geom_density()+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
+```
+
+```{r}
+COVID_Deaths_long %>% 
+  ggplot(aes(Deaths))+geom_density(fill="paleturquoise3", color="salmon", alpha=0.8)+scale_x_log10()
+```
+
+```{r}
+COVID_Deaths_long %>% 
+  ggplot(aes(Deaths))+geom_histogram(color="violetred", fill="turquoise3")+scale_x_log10()
+```
+```{r}
+COVID_Deaths_long %>% 
+  ggplot(aes(x=Deaths)) +
+  geom_histogram(aes(y = after_stat(density)), fill = "deepskyblue4", alpha = 0.4, color = "black")+
+  geom_density(color = "red")+
+  labs(title = "Distribution COVID-19 Deaths")+scale_x_log10()
+```
+```{r}
+COVID_Cases_long %>% 
+  ggplot(aes(x=Cases)) +
+  geom_histogram(aes(y = after_stat(density)), fill = "deepskyblue4", alpha = 0.4, color = "black")+
+  geom_density(color = "red")+
+  labs(title = "Distribution COVID-19 Cases")+scale_x_log10()
+```
+

@@ -1,0 +1,38 @@
+---
+title: "BIS 15 Project"
+output: html_document
+date: "2025-03-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(naniar)
+```
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+COVID_on_TikTok <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/tiktok_data_open.csv")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+summary(COVID_on_TikTok)
+```
+
+```{r}
+glimpse(COVID_on_TikTok)
+```
+```{r}
+names(COVID_on_TikTok)
+```
+

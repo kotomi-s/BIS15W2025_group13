@@ -1,0 +1,49 @@
+---
+title: "BIS 15 project"
+output: html_document
+date: "2025-03-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(naniar)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+COVID_vaccines2 <- read.csv("/Users/sanch/Downloads/COVID-19_Vaccinations_in_the_United_States_County_20250301.csv")
+```
+
+
+```{r}
+COVID_vaccines2 %>% 
+  group_by(Recip_State) %>% 
+  filter(Series_Complete_Yes!="NA") %>% 
+  summarise(total_population=sum(Series_Complete_Yes)) %>% 
+  arrange(-total_population) %>% 
+  top_n(10, total_population) %>% 
+  ggplot(aes(x=reorder(Recip_State, total_population), y=total_population, fill = Recip_State))+geom_col()+labs(title = "States by popuation vaccinated with 2 doses", y="total population vaccinated", x="States")
+```
+
+```{r}
+COVID_vaccines2 %>% 
+  group_by(Recip_County) %>% 
+  filter(Recip_State=="CA") %>% 
+  filter(Series_Complete_Yes!="NA") %>% 
+  summarise(total_sample_size=sum(Series_Complete_Yes)) %>% 
+  arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size) %>% 
+  ggplot(aes(x=reorder(Recip_County, total_sample_size), y=total_sample_size, fill = Recip_County))+geom_col()+coord_flip()+labs(title = "California County by popuation vaccinated with 2 doses", y="total sample size vaccinated", x="California County")
+```
+
+

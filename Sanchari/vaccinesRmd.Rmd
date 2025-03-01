@@ -1,0 +1,105 @@
+---
+title: "BIS 15 project"
+output: html_document
+date: "2025-03-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(tidyverse)
+library(janitor)
+library(naniar)
+```
+
+## Including Plots
+
+```{r pressure, echo=FALSE}
+COVID_vaccines <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/National_Immunization_Survey_Adult_COVID_Module__NIS-ACM___Vaccination_Status_and_Intent_by_Demographics.csv")
+```
+
+```{r}
+summary(COVID_vaccines)
+```
+
+```{r}
+COVID_vaccines %>% 
+  count(Indicator.Category)
+```
+
+```{r}
+names(COVID_vaccines)
+```
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+ arrange(-total_sample_size)
+```
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  #filter(Geography!="National") %>% 
+ #arrange(-total_sample_size) %>% 
+  filter(Geography=="Texas"| Geography=="Guam") %>% 
+ # filter() %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()
+```
+
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+ arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size)
+```
+
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+ arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size) %>% 
+  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()
+```
+
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+   filter(Geography=="Texas"| Geography=="Guam")
+```
+
+```{r}
+ COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category== "Definitely will get an updated bivalent booster (among adults who completed primary series)"| Indicator.Category== "Vaccinated (>=1 dose)" 	
+         ) %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>%  
+ arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size) %>% 
+  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()
+```
+```{r}
+COVID_vaccines %>%
+  Indicator.Category=="Probably will get an updated bivalent booster or are unsure (among adults who completed primary series"
+Indicator.Category=="Definitely Will Get Vaccinated"
+```
+

@@ -30,9 +30,52 @@ summary(COVID_on_TikTok)
 ```
 
 ```{r}
-glimpse(COVID_on_TikTok)
+COVID_on_TikTok %>% 
+summarize(across(everything(), ~ sum(is.na(.))))
 ```
 ```{r}
 names(COVID_on_TikTok)
+```
+```{r}
+sum(is.na(COVID_on_TikTok))
+```
+```{r}
+COVID_on_TikTok %>% 
+  summarise(most_liked_video=max(likes)) 
+  
+```
+```{r}
+COVID_on_TikTok %>% 
+  filter(likes=="8000000")
+#overall rating on DISCERN of moderate or high, video includes humor, presence of comment reflecting intention to change behavior
+```
+
+```{r}
+COVID_on_TikTok %>% 
+  select(likes, views, topic_humor, topic_clinical, topic_ip, d_descriptionofriskfactors) %>% 
+  summarise(likes, views, humor_videos =sum(topic_humor), clinical_videos =sum(topic_clinical), infection_prevention =sum(topic_ip), video_risk_factors=sum(d_descriptionofriskfactors))
+```
+
+```{r}
+COVID_on_TikTok %>% 
+  summarise(humor_videos =sum(topic_humor), clinical_videos =sum(topic_clinical), infection_prevention =sum(topic_ip), video_risk_factors=sum(d_descriptionofriskfactors))
+```
+```{r}
+COVID_on_TikTok2<- COVID_on_TikTok %>% 
+  pivot_longer(-c(views, likes, comments), names_to = "x", values_to = "y")
+```
+
+```{r}
+COVID_on_TikTok2 %>% 
+  filter(x=="topic_humor"|x=="topic_clinical"|x=="topic_ip"| x== "d_descriptionofsymptoms") %>% 
+  separate(x, into = c("video topic"), sep = -1) %>% 
+  mutate(x=str_remove(x, "_"))
+```
+
+```{r}
+COVID_on_TikTok2 %>% 
+  filter(x=="topic_humor"|x=="topic_clinical"|x=="topic_ip"| x== "d_descriptionofsymptoms") %>% 
+  separate(x, into= c("video topic"))
+ # mutate(x=str_remove(x, "_"))
 ```
 

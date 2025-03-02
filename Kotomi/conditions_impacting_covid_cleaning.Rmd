@@ -1,0 +1,81 @@
+---
+title: "conditions impacting covid"
+author: "Kotomi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+NOTE: I avoided pushing the .csv file that I used in this analysis b/c GitHub says it's too large. Will try and make the data accessible elsewhere but for now they can be downloaded from the link in the project doc
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+getwd()
+```
+
+
+```{r}
+conditions <- read.csv("data/conditions_covid.csv") %>% clean_names()
+```
+
+```{r}
+summary(conditions)
+```
+Notes on the raw data:
+* the dataset already contains totals grouped by year and month, as indicated by the value in the "group" columns. 
+* some potential variables for analyses supported by this data:
+    + age group
+    + condition/condition group
+    + state
+    + time period
+
+Overall, across all 3 years, and all age groups, which condition group contributed to the most COVID-19 deaths? Which condition in that group? 
+```{r}
+conditions %>% 
+  filter(group=="By Total" & covid_19_deaths!="NA" & state=="United States") %>% 
+  group_by(condition_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  arrange(desc(total_deaths))
+```
+does the listed condition being COVID-19 just mean that COVID itself was the only condition leading to death?
+
+```{r}
+conditions %>% 
+  filter(condition_group=="Respiratory diseases" & group=="By Total" & covid_19_deaths!="NA" & state=="United States") %>% 
+  group_by(condition) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  arrange(desc(total_deaths))
+```
+
+Across all 3 years: How do the conditions contributing to deaths from COVID vary by state?
+
+```{r}
+conditions %>% 
+  filter(group=="By Total" & covid_19_deaths!="NA" & state!="United States") %>% 
+  group_by(state, condition_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  arrange(desc(total_deaths))
+```
+
+Which condition group is most frequently associated with death in age group of 0-24?
+```{r}
+conditions %>% 
+  filter(group=="By Total" & covid_19_deaths!="NA" & state=="United States", age_group=="0-24") %>% 
+  group_by(condition_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  arrange(desc(total_deaths))
+```
+
+Potential idea: if we can standardize date format across case, death, and vaccination data, maybe we can join those datasets and do analysis across them. 
+
+
+
+

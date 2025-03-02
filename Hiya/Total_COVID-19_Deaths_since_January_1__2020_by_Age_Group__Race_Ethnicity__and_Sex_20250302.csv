@@ -1,0 +1,18 @@
+data_as_of,data_period_end,demographic,population,covid_deaths,total_deaths,pop_percent
+02/13/2025,01/31/2025,Age Group,0-4 years,1023,1219649,0.08
+02/13/2025,01/31/2025,Age Group,12-17 years,632,1219649,0.05
+02/13/2025,01/31/2025,Age Group,18-29 years,7269,1219649,0.6
+02/13/2025,01/31/2025,Age Group,30-39 years,20401,1219649,1.67
+02/13/2025,01/31/2025,Age Group,40-49 years,47333,1219649,3.88
+02/13/2025,01/31/2025,Age Group,5-11 years,375,1219649,0.03
+02/13/2025,01/31/2025,Age Group,50-64 years,208849,1219649,17.12
+02/13/2025,01/31/2025,Age Group,65-74 years,269464,1219649,22.09
+02/13/2025,01/31/2025,Age Group,75+ years,664303,1219649,54.47
+02/13/2025,01/31/2025,Race/Ethnicity,Hispanic,175929,1211665,14.52
+02/13/2025,01/31/2025,Race/Ethnicity,Non-Hispanic American Indian or Alaska Native,12542,1211665,1.04
+02/13/2025,01/31/2025,Race/Ethnicity,Non-Hispanic Asian,38047,1211665,3.14
+02/13/2025,01/31/2025,Race/Ethnicity,Non-Hispanic Black,163639,1211665,13.51
+02/13/2025,01/31/2025,Race/Ethnicity,Non-Hispanic Native Hawaiian or Other Pacific Islander,2383,1211665,0.2
+02/13/2025,01/31/2025,Race/Ethnicity,Non-Hispanic White,819125,1211665,67.6
+02/13/2025,01/31/2025,Sex,Female,552427,1219663,45.29
+02/13/2025,01/31/2025,Sex,Male,667236,1219663,54.71

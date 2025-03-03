@@ -1,5 +1,5 @@
 ---
-title: "BIS 15 project"
+title: "COVID-19 Deaths and Cases"
 output: html_document
 date: "2025-03-01"
 ---
@@ -82,7 +82,15 @@ COVID_Deaths_long %>%
   filter(State=="CA"|State=="FL"|State=="GA"|State=="IL"|State=="MI"|State=="NJ"|State=="NY"|State=="OH"|State=="PA"|State=="TX") %>% 
   summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
   arrange(-average_deaths) %>% 
-  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths in the US by States", x="Time", y="Average Deaths")
+  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths over time in the US by States", x="Time", y="Average Deaths")
+```
+```{r}
+COVID_Deaths_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="SD") %>% 
+  summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
+  arrange(-average_deaths) %>% 
+  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths over time in the US by States", x="Time", y="Average Deaths")
 ```
 
 ```{r}
@@ -91,16 +99,17 @@ COVID_Deaths_long %>%
   filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
   summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
   arrange(-average_deaths) %>% 
-  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
+  ggplot(aes(x=Date, y=average_deaths, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Deaths Over Time in the Ten Most Affected States", x="Time", y="Average Deaths")
 ```
 
 ```{r}
 COVID_Deaths_long %>% 
-  group_by(State, Date) %>% 
+  group_by(State) %>% 
   filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
- # summarise(average_deaths=mean(Deaths, na.rm = T)) %>% 
- # arrange(-average_deaths) %>% 
-  ggplot(aes(x=Date, y=Deaths, group = State, colour = State))+geom_density()+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
+  summarise(total_deaths=sum(Deaths, na.rm = T)) %>% 
+  arrange(-total_deaths) %>% 
+  ggplot(aes(x=reorder(State, total_deaths)
+               , y=total_deaths, group = State, fill = State, colour = "black"))+geom_col(size=0.5)+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
 ```
 
 ```{r}

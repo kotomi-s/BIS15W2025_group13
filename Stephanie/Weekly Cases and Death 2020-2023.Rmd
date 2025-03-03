@@ -40,11 +40,12 @@ Connections with death?
 - The weeks with most deaths?
 - How much did it collide with new cases
 
+Test to see if save pushes
 
 ```{r}
 Weekly %>% 
   select(state, tot_deaths) %>% 
   arrange(-tot_deaths) %>% 
-  filter!="CA" 
+  filter!="CA"
 ```
 

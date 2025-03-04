@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-NOTE: I avoided pushing the .csv file that I used in this analysis b/c GitHub says it's too large. Will try and make the data accessible elsewhere but for now they can be downloaded from the link in the project doc
+NOTE: I avoided pushing the raw data .csv file that I used in this analysis b/c GitHub says it's too large. Will try and make the data accessible elsewhere but for now they can be downloaded from the link in the project doc
 
 ```{r}
 library(dplyr)
@@ -27,15 +27,20 @@ conditions <- read.csv("data/conditions_covid.csv") %>% clean_names()
 ```
 
 ```{r}
+#write.csv(conditions, file = "conditions_clean.csv", row.names = F)
+```
+
+
+```{r}
 summary(conditions)
 ```
-Notes on the raw data:
-* the dataset already contains totals grouped by year and month, as indicated by the value in the "group" columns. 
-* some potential variables for analyses supported by this data:
-    + age group
-    + condition/condition group
-    + state
-    + time period
+Notes on the raw data:  
+* the dataset already contains totals grouped by year and month, as indicated by the value in the "group" columns.  
+* some potential variables for analyses supported by this data:  
+    + age group  
+    + condition/condition group  
+    + state  
+    + time period  
 
 Overall, across all 3 years, and all age groups, which condition group contributed to the most COVID-19 deaths? Which condition in that group? 
 ```{r}
@@ -60,7 +65,7 @@ Across all 3 years: How do the conditions contributing to deaths from COVID vary
 ```{r}
 conditions %>% 
   filter(group=="By Total" & covid_19_deaths!="NA" & state!="United States") %>% 
-  group_by(state, condition_group) %>% 
+  group_by(state) %>% 
   summarise(total_deaths=sum(covid_19_deaths)) %>% 
   arrange(desc(total_deaths))
 ```
@@ -74,8 +79,33 @@ conditions %>%
   arrange(desc(total_deaths))
 ```
 
-Potential idea: if we can standardize date format across case, death, and vaccination data, maybe we can join those datasets and do analysis across them. 
+Potential idea: if we can standardize date and state format across case, death, and vaccination data, maybe we can join those datasets and do analysis across them. 
 
+```{r}
+unique(conditions$condition)
+```
+
+
+which state had the most COVID-19 deaths involving heart failure?
+```{r}
+conditions %>% 
+  filter(group=="By Total" & covid_19_deaths!="NA" & condition=="Heart failure" & state!="United States") %>% 
+  group_by(state) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  ggplot(aes(x=state, y=total_deaths))+
+  geom_col()+
+  coord_flip()
+
+```
+
+which age group has the most deaths? (all 3 years)
+```{r}
+conditions %>% 
+  filter(group=="By Total" & covid_19_deaths!="NA" & state=="United States") %>% 
+  group_by(age_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths)) %>% 
+  arrange(desc(total_deaths))
+```
 
 
 

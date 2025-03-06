@@ -23,7 +23,7 @@ getwd()
 
 
 ```{r}
-conditions <- read.csv("data/conditions_covid.csv") %>% clean_names()
+conditions <- read.csv("data/conditions_clean.csv")
 ```
 
 ```{r}
@@ -112,14 +112,14 @@ unique(conditions$state)
 ```
 
 
-creating a df with only our states of interest (CA, TX, FL, NY)
+creating a df with only our states of interest (CA, TX, FL, NY, PA)
 ```{r}
-conditions_states_top4 <- conditions %>% 
-  filter(state=="California" | state=="Texas" | state=="Florida" | state=="New York")
+conditions_states <- conditions %>% 
+  filter(state=="California" | state=="Texas" | state=="Florida" | state=="New York" | state=="Pennsylvania")
   
 ```
 
 ```{r}
-#write.csv(conditions_states_top4, file = "conditions_states_top4.csv", row.names = F)
+write.csv(conditions_states, file = "conditions_states.csv", row.names = F)
 ```
 

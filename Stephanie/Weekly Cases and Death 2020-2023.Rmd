@@ -9,25 +9,63 @@ library("dplyr")
 library("janitor")
 
 ```
+
+```{r}
+options(scipen=999)
+```
+
+
 ```{r}
 Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/WeeklyCases.csv") %>% clean_names()
 ```
 ```{r}
-summary(Weekly)
+Weekly_5 <- Weekly %>% 
+  filter(state=="CA"|state=="TX"|state=="NYC"|state=="PA"|state=="FL") %>% 
+  select(state, new_cases, start_date) %>% 
+  
 ```
+
+```{r}
+Weekly_5 %>% 
+  group_by(state) %>% 
+  select(state, new_cases) %>% 
+  mutate(week_number=row_number()) %>% 
+  ggplot(aes(x=week_number, y=new_cases, color=state))+
+  geom_line()+
+  labs(title="Weekly New Cases in California 2020-2023",
+       x="Weeks",
+       y="New Cases")+
+  theme_minimal()
+```
+
 graps of new cases and total deaths. top 5 highest states/lowest states. time variable. see how it increases over weeks and seasons
+```{r}
+Weekly %>% 
+  group_by(state) %>% 
+  select(state, new_cases) %>% 
+  filter(state=="CA") %>% 
+  mutate(week_number=row_number()) %>% 
+  ggplot(aes(x=week_number, y=new_cases))+
+  geom_line()+
+  labs(title="Weekly New Cases in California 2020-2023",
+       x="Weeks",
+       y="New Cases")+
+  theme_minimal()
+```
+
 
 ```{r}
 Weekly %>% 
   group_by(state) %>% 
-  select(state, new_cases, start_date) %>% 
-  filter(state=="CA") %>% 
+  select(state, new_cases) %>% 
+  filter(state=="TX") %>% 
   mutate(week_number=row_number()) %>% 
   ggplot(aes(x=week_number, y=new_cases))+
-  geom_point()+
+  geom_line()+
   labs(title="Weekly New Cases in California 2020-2023",
        x="Weeks",
-       y="New Cases")
+       y="New Cases")+
+  theme_minimal()
 ```
 
 Observations:
@@ -35,6 +73,7 @@ Observations:
 - Do some research, why the sudden peaks?
 - What is the highest peak?
 - Which seasons/months were the highest peaks? Maybe start of new school session or holidays like christmas, people likely to spend more time outside in close contact. 
+- This marks the first death
 
 Connections with death?
 - The weeks with most deaths?
@@ -44,8 +83,11 @@ Test to see if save pushes
 
 ```{r}
 Weekly %>% 
-  select(state, tot_deaths) %>% 
-  arrange(-tot_deaths) %>% 
-  filter!="CA"
+  select(state, new_deaths) %>% 
+  arrange(-new_deaths) %>% 
+  filter(state=="CA") %>% 
+  mutate(week_number=row_number()) %>% 
+  ggplot(aes(x=week_number, y=new_deaths))+
+  geom_point()
 ```
 

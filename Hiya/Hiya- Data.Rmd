@@ -3,8 +3,50 @@ title: "BIS 15 project"
 output: html_document
 date: "2025-03-02"
 ---
+```{r}
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(janitor)
+library(scales) 
+library(lubridate)
+library(ggplot2)
+```
+
 
 ```{r}
-data <- read.csv('/Users/hiyabhandari/Desktop/BIS15W2025_group13/Hiya/Total_COVID-19_Deaths_since_January_1__2020_by_Age_Group__Race_Ethnicity__and_Sex_20250302.csv')
+options(spipen=-999)
+```
+
+```{r}
+data <- read.csv('/Users/hiyabhandari/Desktop/BIS15W2025_group13/Hiya/conditions_states.csv')
+```
+
+```{r}
+data <- data %>%
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date))
+```
+
+```{r}
+glimpse(data)
+```
+```{r}
+
+df_clean <- data %>%
+  filter(!is.na(year), !is.na(month)) %>%
+  mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%  # Create a date column
+  group_by(state, date) %>%
+  summarize(total_deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = "drop")
+
+ggplot(df_clean, aes(x = date, y = total_deaths, color = state, group = state)) +
+  geom_line() +
+  labs(title = "COVID-19 Deaths by State and Month", x = "Date", y = "Total Deaths", color = "State") +
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 70, hjust = 1))
+
 ```
 

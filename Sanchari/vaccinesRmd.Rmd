@@ -1,5 +1,5 @@
 ---
-title: "BIS 15 project"
+title: "COVID-19 Vaccines"
 output: html_document
 date: "2025-03-01"
 ---
@@ -44,28 +44,26 @@ COVID_vaccines %>%
   filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
   filter(Geography!="National") %>% 
   summarise(total_sample_size=sum(Sample.Size)) %>% 
- arrange(-total_sample_size)
+ arrange(total_sample_size)
 ```
 ```{r}
 COVID_vaccines %>% 
   group_by(Geography) %>% 
   filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
-  #filter(Geography!="National") %>% 
- #arrange(-total_sample_size) %>% 
-  filter(Geography=="Texas"| Geography=="Guam") %>% 
- # filter() %>% 
+
+  filter(Geography=="Texas"| Geography=="Tennessee") %>% 
+
   summarise(total_sample_size=sum(Sample.Size)) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()
+  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()+labs(title = "Vaccines Between the Most and Least States That don't want to get Vaccinated")
 ```
 
 ```{r}
 COVID_vaccines %>% 
   group_by(Geography) %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+   filter(Indicator.Category== "Definitely will get an updated bivalent booster (among adults who completed primary series)"| Indicator.Category== "Vaccinated (>=1 dose)") %>% 
   filter(Geography!="National") %>% 
   summarise(total_sample_size=sum(Sample.Size)) %>% 
- arrange(-total_sample_size) %>% 
-  top_n(10, total_sample_size)
+ arrange(-total_sample_size)
 ```
 
 ```{r}
@@ -76,14 +74,11 @@ COVID_vaccines %>%
   summarise(total_sample_size=sum(Sample.Size)) %>% 
  arrange(-total_sample_size) %>% 
   top_n(10, total_sample_size) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()
+  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "Top 10 States that Probably or Definitely Will Not Get Vaccinated")
 ```
 
 ```{r}
-COVID_vaccines %>% 
-  group_by(Geography) %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
-   filter(Geography=="Texas"| Geography=="Guam")
+
 ```
 
 ```{r}
@@ -95,11 +90,33 @@ COVID_vaccines %>%
   summarise(total_sample_size=sum(Sample.Size)) %>%  
  arrange(-total_sample_size) %>% 
   top_n(10, total_sample_size) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()
+  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "Top 10 States that have been Vaccinated")
 ```
 ```{r}
-COVID_vaccines %>%
-  Indicator.Category=="Probably will get an updated bivalent booster or are unsure (among adults who completed primary series"
-Indicator.Category=="Definitely Will Get Vaccinated"
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Geography=="California"|Geography=="Texas"|Geography=="Florida"|Geography=="New York"|Geography=="Illinois"|Geography=="Pennsylvania"|Geography=="Ohio"|Geography=="North Carolina"|Geography=="Michigan"|Geography=="New Jersey") %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>%
+  ggplot(aes(x=reorder(Geography, total_sample_size)
+               , y=total_sample_size, group = Geography, fill = Geography))+geom_col()+labs(title = "COVID-19 Vaccines in the Ten States with Most Deaths", x="States", y="People taken the vaccines")+coord_flip()
+```
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography=="California"| Geography=="South Dakota") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()+labs(title = "COVID-19 vaccines Between States with Least and Most Deaths")
+```
+
+```{r}
+states <- COVID_vaccines %>% 
+  count(Geography)
+```
+
+```{r}
+COVID_vaccines %>% 
+  count(Indicator.Category)
 ```
 

@@ -1,0 +1,51 @@
+---
+title: "Weekly United States COVID-19 Cases and Deaths by State"
+output: html_document
+---
+
+```{r}
+library("tidyverse") 
+library("dplyr")
+library("janitor")
+
+```
+```{r}
+Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/WeeklyCases.csv") %>% clean_names()
+```
+```{r}
+summary(Weekly)
+```
+graps of new cases and total deaths. top 5 highest states/lowest states. time variable. see how it increases over weeks and seasons
+
+```{r}
+Weekly %>% 
+  group_by(state) %>% 
+  select(state, new_cases, start_date) %>% 
+  filter(state=="CA") %>% 
+  mutate(week_number=row_number()) %>% 
+  ggplot(aes(x=week_number, y=new_cases))+
+  geom_point()+
+  labs(title="Weekly New Cases in California 2020-2023",
+       x="Weeks",
+       y="New Cases")
+```
+
+Observations:
+- Where are the peaks?
+- Do some research, why the sudden peaks?
+- What is the highest peak?
+- Which seasons/months were the highest peaks? Maybe start of new school session or holidays like christmas, people likely to spend more time outside in close contact. 
+
+Connections with death?
+- The weeks with most deaths?
+- How much did it collide with new cases
+
+Test to see if save pushes
+
+```{r}
+Weekly %>% 
+  select(state, tot_deaths) %>% 
+  arrange(-tot_deaths) %>% 
+  filter!="CA"
+```
+

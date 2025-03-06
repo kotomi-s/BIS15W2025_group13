@@ -107,5 +107,19 @@ conditions %>%
   arrange(desc(total_deaths))
 ```
 
+```{r}
+unique(conditions$state)
+```
 
+
+creating a df with only our states of interest (CA, TX, FL, NY)
+```{r}
+conditions_states_top4 <- conditions %>% 
+  filter(state=="California" | state=="Texas" | state=="Florida" | state=="New York")
+  
+```
+
+```{r}
+#write.csv(conditions_states_top4, file = "conditions_states_top4.csv", row.names = F)
+```
 

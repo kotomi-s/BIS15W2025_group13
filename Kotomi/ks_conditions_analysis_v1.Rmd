@@ -11,8 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-library(tidyverse)
-library(janitor)
+library("tidyverse")
+library("janitor")
+library(lubridate)
 ```
 
 ```{r}
@@ -21,8 +22,13 @@ options(scipen=999)
 
 
 ```{r}
-conditions <- read.csv("data/conditions_states.csv")
+conditions <- read.csv("data/conditions_clean.csv")
 ```
+
+```{r}
+conditions_states <- read.csv("data/conditions_states.csv")
+```
+
 
 ```{r}
 glimpse(conditions)
@@ -52,7 +58,7 @@ conditions %>%
             .groups = "keep") %>% 
   ggplot(aes(x=reorder(condition_group, total_deaths), y=total_deaths))+
   geom_col()+
-  theme_linedraw()+
+  theme_minimal()+
   coord_flip()+
   labs(title = "Conditions Groups Contributing to COVID-19 Deaths, Ages 0-24 years",
        x = "Condition Group",
@@ -101,14 +107,45 @@ conditions %>%
 
 COVID-19 deaths associated with circulatory disease in California, 2020.
 ```{r}
-conditions %>% 
-  filter(group=="By Month", state=="California", year=="2020", condition_group=="Circulatory diseases") %>% 
-  group_by(month) %>% 
-  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm=T)) %>% 
-  ggplot(aes(x=month, y=total_covid_deaths))+
-  geom_line()
+conditions_states %>% 
+  filter(group=="By Month", year=="2020") %>%
+  group_by(year, month, state) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm=T),
+            .groups = "drop") %>% 
+  ggplot(aes(x=month, y=total_covid_deaths, color = state))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:12)+
+  theme_minimal()
 ```
 
+
+
+working with hiya's code
+```{r}
+conditions_states <- conditions_states %>%
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         end_date = as.Date(end_date, format = "%m/%d/%Y"))
+```
+
+```{r}
+glimpse(data)
+```
+```{r}
+
+conditions_states %>% 
+  filter(group=="By Month") %>% 
+  group_by(state, start_date) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
+            .groups = "drop") %>% 
+ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
+  geom_line() +
+  labs(title = "COVID-19 Deaths by State and Month", x = "Date", y = "Total Deaths", color = "State") +
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 70, hjust = 1))
+
+```
 
 
 

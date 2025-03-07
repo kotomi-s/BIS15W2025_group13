@@ -1,0 +1,51 @@
+---
+title: "separating conditions data"
+author: "Kotomi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library("tidyverse")
+library("janitor")
+library(lubridate)
+```
+
+
+```{r}
+conditions_states <- read.csv("data/conditions_states.csv")
+```
+
+use filter to make a data frame containing only the totals, fix dates, and select relevant columns
+```{r}
+totals_states_conditions <- conditions_states %>% 
+  filter(group=="By Total") %>% 
+  select(-data_as_of, -group, -year, -month, -icd10_codes, -flag, -number_of_mentions)
+  
+```
+
+make data frame containing only monthly data, fix dates, select relevant columns
+```{r}
+monthly_states_conditions <- conditions_states %>% 
+  filter(group=="By Month") %>% 
+  select(-data_as_of, -group, -icd10_codes, -flag, -number_of_mentions)
+```
+
+write both new dfs to csv
+```{r}
+write.csv(totals_states_conditions, file = "totals_states_conditions.csv", row.names = F)
+write.csv(monthly_states_conditions, file = "monthly_states_conditions.csv", row.names = F)
+```
+
+```{r}
+glimpse(totals_states_conditions)
+```
+
+
+
+

@@ -43,28 +43,26 @@ totals <- totals %>%
 
 show trends across all 3 years, all deaths **hiya already doing this, just checking overall trends
 ```{r}
-png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #turning this into a png
+png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #turning this into a png, defining filename and dimensions
 monthly %>%
   group_by(state, start_date) %>% 
   summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
             .groups = "keep") %>% 
 ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
-  geom_line(linewidth = 0.9) +
-  theme_minimal()+
-  scale_colour_brewer(palette = "Paired")+
+  geom_line(linewidth = 1.2)+
   labs(title = "COVID-19 Deaths in States of Interest", 
        x = "Date", 
        y = "Deaths", 
-       color = "State") +
-  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
-  theme(
+       color = "State")+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme_minimal()+
+  scale_colour_brewer(palette = "Paired")+ #indicate the color palette
+  theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
     legend.position = "bottom",
-    axis.text.x = element_text(angle = 70, hjust = 1),
-    title = element_text(size=15))
-```
-
-```{r}
-?png
+    legend.text = element_text(size = 20))
 ```
 
 
@@ -77,18 +75,20 @@ monthly %>%
   summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
             .groups = "drop") %>% 
 ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
-  geom_line(linewidth = 0.9) +
-  theme_minimal()+
-  scale_colour_brewer(palette = "Paired")+
+  geom_line(linewidth = 1.2)+
   labs(title = "COVID-19 Deaths Associated with Circulatory Disease", 
        x = "Date", 
        y = "Deaths", 
-       color = "State") +
-  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
-  theme(
+       color = "State")+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme_minimal()+
+  scale_colour_brewer(palette = "Paired")+
+  theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
     legend.position = "bottom",
-    axis.text.x = element_text(angle = 70, hjust = 1),
-    title = element_text(size=15))
+    legend.text = element_text(size = 20))
 ```
 
 trends across all 3 years, associated with obesity
@@ -100,18 +100,20 @@ monthly %>%
   summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
             .groups = "drop") %>% 
 ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
-  geom_line(linewidth = 0.9) +
-  theme_minimal()+
-  scale_colour_brewer(palette = "Paired")+
+  geom_line(linewidth = 1.2)+
   labs(title = "COVID-19 Deaths Associated with Obesity", 
        x = "Date", 
        y = "Deaths", 
        color = "State") +
   scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
-  theme(
+  theme_minimal()+
+  scale_colour_brewer(palette = "Paired")+
+  theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
     legend.position = "bottom",
-    axis.text.x = element_text(angle = 70, hjust = 1),
-    title = element_text(size=15))
+    legend.text = element_text(size = 20))
 ```
 
 barplot showing percentage of deaths due to particular conditions, by state
@@ -124,15 +126,19 @@ totals %>%
   ggplot(aes(x=state, y=deaths, fill=condition_group))+
   geom_col(position = position_fill())+
   scale_y_continuous(labels = scales::percent)+
-  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text wrapping in the legend at ~40 characters?
-  theme_minimal()+
   labs(title = "% of COVID-19 Deaths Associated with Various Conditions, by State",
        x= "State",
        y=NULL,
        fill="Condition Type")+
-  theme(axis.text.x = element_text(angle=70,
-                                   margin = margin(t=15)),
-        title = element_text(size=15))
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text wrapping in the legend at ~40 characters?
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 20), 
+    axis.text.y = element_text(size = 20),
+    legend.position = "right", #looks better on bar plot
+    legend.text = element_text(size = 20))
+
 ```
 
 barplot showing percentage of deaths due to particular conditions, by age group
@@ -147,13 +153,18 @@ totals %>%
   ggplot(aes(x=age_group, y=deaths, fill=condition_group))+
   geom_col(position = position_fill())+
   scale_y_continuous(labels = scales::percent)+
-  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text in the legend wrapping at ~40 characters?
-  theme_minimal()+
-  labs(title = "% of COVID-19 Deaths Associated with Various Conditions, by Age",
-       x= "Age",
+  labs(title = "% of COVID-19 Deaths Associated with Various Conditions, by Age Group",
+       x= "Age Group",
        y=NULL,
        fill="Condition Type")+
-  theme(title = element_text(size=15))
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text wrapping in the legend at ~40 characters?
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 20),
+    axis.text.y = element_text(size = 20),
+    legend.position = "right", #looks better on bar plot
+    legend.text = element_text(size = 20))
 ```
 
 barplot showing percentage of deaths due to particular conditions, by year
@@ -166,13 +177,18 @@ monthly %>%
   ggplot(aes(x=year, y=deaths, fill=condition_group))+
   geom_col(position = position_fill())+
   scale_y_continuous(labels = scales::percent)+
-  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text in the legend wrapping at ~40 characters?
-  theme_minimal()+
   labs(title = "% of COVID-19 Deaths Associated with Various Conditions, by Year",
        x= "Year",
        y=NULL,
        fill="Condition Type")+
-  theme(title = element_text(size=15))
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text in the legend wrapping at ~40 characters?
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 20),
+    axis.text.y = element_text(size = 20),
+    legend.position = "right", #looks better on bar plot
+    legend.text = element_text(size = 20))
 ```
 
 breakdown of respiratory diseases associated with covid deaths, by age group
@@ -189,8 +205,8 @@ totals %>%
   scale_y_continuous(labels = scales::percent)+
   scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text in the legend wrapping at ~40 characters?
   theme_minimal()+
-  labs(title = "% Breakdown of Respiratory disease-associated COVID deaths, by Age",
-       x= "Age",
+  labs(title = "% Breakdown of Respiratory disease-associated COVID deaths, by Age Group",
+       x= "Age Group",
        y=NULL,
        fill="Condition")
 ```

@@ -55,7 +55,9 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
        y = "Deaths", 
        color = "State")+
   scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
-  theme_minimal()+
+ 
+  #the following code chunk can be copy-pasted for consistent line-plot formatting
+   theme_minimal()+
   scale_colour_brewer(palette = "Paired")+ #indicate the color palette
   theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
     title = element_text(size=28),
@@ -130,6 +132,8 @@ totals %>%
        x= "State",
        y=NULL,
        fill="Condition Type")+
+  
+  #the following code chunk can be copy-pasted for consistent barplot formatting
   theme_minimal()+
   scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text wrapping in the legend at ~40 characters?
   theme( 

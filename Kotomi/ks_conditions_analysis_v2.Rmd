@@ -43,7 +43,9 @@ totals <- totals %>%
 
 show trends across all 3 years, all deaths **hiya already doing this, just checking overall trends
 ```{r}
-png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #turning this into a png, defining filename and dimensions
+
+png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #exporting this plot as a png, defining file name and dimensions
+
 monthly %>%
   group_by(state, start_date) %>% 
   summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
@@ -70,7 +72,9 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 
 show trends across all 3 years, associated with circulatory disease
 ```{r}
+
 png(filename = "allcirculatory.png", width = 1200, height = 720, units = "px")
+
 monthly %>% 
   filter(condition_group=="Circulatory diseases") %>% 
   group_by(state, start_date) %>% 
@@ -95,12 +99,15 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 
 trends across all 3 years, associated with obesity
 ```{r}
+
 png(filename = "allobesity.png", width = 1200, height = 720, units = "px")
+
 monthly %>% 
   filter(condition_group=="Obesity") %>% 
   group_by(state, start_date) %>% 
   summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
             .groups = "drop") %>% 
+  
 ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
   geom_line(linewidth = 1.2)+
   labs(title = "COVID-19 Deaths Associated with Obesity", 
@@ -120,7 +127,9 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 
 barplot showing percentage of deaths due to particular conditions, by state
 ```{r}
+
 png(filename = "pctbystate.png", width = 1200, height = 720, units = "px")
+
 totals %>% 
   group_by(state, condition_group) %>% 
   summarise(deaths=sum(covid_19_deaths, na.rm = T),
@@ -147,7 +156,9 @@ totals %>%
 
 barplot showing percentage of deaths due to particular conditions, by age group
 ```{r}
+
 png(filename = "pctbyage.png", width = 1200, height = 720, units = "px")
+
 totals %>% 
   filter(age_group!="All Ages" &
            age_group!="Not stated") %>% 
@@ -173,7 +184,9 @@ totals %>%
 
 barplot showing percentage of deaths due to particular conditions, by year
 ```{r}
+
 png(filename = "pctbyyear.png", width = 1200, height = 720, units = "px")
+
 monthly %>%  
   group_by(year, condition_group) %>% 
   summarise(deaths=sum(covid_19_deaths, na.rm = T),

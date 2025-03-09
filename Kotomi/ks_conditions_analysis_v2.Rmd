@@ -25,6 +25,12 @@ read csvs
 totals <- read.csv("data/totals_states_conditions.csv")
 monthly <- read.csv("data/monthly_states_conditions.csv")
 ```
+
+```{r}
+options(scipen = 999)
+```
+
+
 summary functions
 ```{r}
 glimpse(monthly)
@@ -44,7 +50,7 @@ totals <- totals %>%
 show trends across all 3 years, all deaths **hiya already doing this, just checking overall trends
 ```{r}
 
-png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #exporting this plot as a png, defining file name and dimensions
+#png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #exporting this plot as a png, defining file name and dimensions
 
 monthly %>%
   group_by(state, start_date) %>% 
@@ -73,7 +79,7 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 show trends across all 3 years, associated with circulatory disease
 ```{r}
 
-png(filename = "allcirculatory.png", width = 1200, height = 720, units = "px")
+#png(filename = "allcirculatory.png", width = 1200, height = 720, units = "px")
 
 monthly %>% 
   filter(condition_group=="Circulatory diseases") %>% 
@@ -100,7 +106,7 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 trends across all 3 years, associated with obesity
 ```{r}
 
-png(filename = "allobesity.png", width = 1200, height = 720, units = "px")
+#png(filename = "allobesity.png", width = 1200, height = 720, units = "px")
 
 monthly %>% 
   filter(condition_group=="Obesity") %>% 
@@ -128,7 +134,7 @@ ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)
 barplot showing percentage of deaths due to particular conditions, by state
 ```{r}
 
-png(filename = "pctbystate.png", width = 1200, height = 720, units = "px")
+#png(filename = "pctbystate.png", width = 1200, height = 720, units = "px")
 
 totals %>% 
   group_by(state, condition_group) %>% 
@@ -157,7 +163,7 @@ totals %>%
 barplot showing percentage of deaths due to particular conditions, by age group
 ```{r}
 
-png(filename = "pctbyage.png", width = 1200, height = 720, units = "px")
+#png(filename = "pctbyage.png", width = 1200, height = 720, units = "px")
 
 totals %>% 
   filter(age_group!="All Ages" &
@@ -185,7 +191,7 @@ totals %>%
 barplot showing percentage of deaths due to particular conditions, by year
 ```{r}
 
-png(filename = "pctbyyear.png", width = 1200, height = 720, units = "px")
+#png(filename = "pctbyyear.png", width = 1200, height = 720, units = "px")
 
 monthly %>%  
   group_by(year, condition_group) %>% 
@@ -227,6 +233,66 @@ totals %>%
        y=NULL,
        fill="Condition")
 ```
+% scaled barplot, showing composition of conditions over the course of the pandemic. faceted to show all 5 states.
+```{r}
+png(filename = "pct_conditionsovertime.png", width = 1200, height = 900, units = "px")
+monthly %>%
+  group_by(start_date, condition_group, state) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
+            .groups = "keep") %>% 
+ggplot(aes(x = start_date, y = total_covid_deaths, fill=condition_group)) +
+  geom_col(position = position_fill(), show.legend = F)+
+  scale_y_continuous(labels = scales::percent)+
+
+  labs(title = "COVID-19 Deaths in States of Interest", 
+       x = "Date", 
+       y = "Deaths", 
+       color = "State",
+       fill = "Condition group")+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 30))+ #applies text wrapping in the legend at ~40 characters?
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 14, angle = 70,margin = margin(15)), 
+    axis.text.y = element_text(size = 20),
+    legend.position = "bottom", #looks better on bar plot
+    legend.text = element_text(size = 15))+
+  facet_grid(state~.)
+```
+
+
+```{r}
+png(filename = "allstates_pct_conditionsbyage.png", width = 1200, height = 900, units = "px")
+monthly %>%
+  filter(age_group!="All Ages" &
+           age_group!="Not stated") %>% 
+  group_by(age_group, condition_group, state) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
+            .groups = "keep") %>% 
+ggplot(aes(x = age_group, y = total_covid_deaths, fill=condition_group)) +
+  geom_col(position = position_fill(), show.legend = F)+
+  scale_y_continuous(labels = scales::percent)+
+
+  labs(title = "% COVID-19 Deaths Associated with Various Conditions by Age Group", 
+       x = "Age Group", 
+       y = NULL, 
+       color = "State",
+       fill = "Condition group")+
+  theme_minimal()+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 30))+ #applies text wrapping in the legend at ~40 characters?
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(size = 20), 
+    axis.text.y = element_text(size = 15),
+    legend.position = "bottom", #looks better on bar plot
+    legend.text = element_text(size = 15),
+    strip.text = element_text(size = 20))+
+  facet_grid(state~.)
+```
+
+
 
 shiny app time! the idea is to have the user be able to select a condition group another variable (state, age group). shiny app is in a separate R script.
 

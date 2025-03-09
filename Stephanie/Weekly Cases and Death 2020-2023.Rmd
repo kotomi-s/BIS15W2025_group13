@@ -9,6 +9,7 @@ library("dplyr")
 library("janitor")
 library("lubridate")
 library("ggplot2")
+library("RColorBrewer")
 ```
 
 ```{r}
@@ -38,14 +39,19 @@ Weekly5 <- Weekly %>%
 
 
 ```{r}
+png(filename = "WeeklyCovid19CasesbyState.png", width = 1200, height = 720, units = "px")
 Weekly5 %>% 
   group_by(state) %>% 
   ggplot(aes(x=start_date, y=new_cases, color=state))+
-  geom_line()+
+  geom_line(linewidth = 1.5)+
+  scale_color_brewer(palette = "Paired")+ 
   theme_minimal()+
-  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "1 months")+
-  theme(legend.position = "bottom",
-    axis.text.x = element_text(size = 7, angle = 70, hjust = 1))+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme(title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
+    legend.position = "bottom",
+    legend.text = element_text(size = 20))+
   labs(title="Weekly Covid-19 Cases by State in 2019-2023",
        x="Months (2019-2023)",
        y="New Cases",
@@ -53,20 +59,30 @@ Weekly5 %>%
 ```
 
 ```{r}
+display.brewer.pal(12,"Paired")
+```
+
+```{r}
+png(filename = "TotalCovid19CasesintheUS.png", width = 1200, height = 720, units = "px")
 Weekly %>% 
-  filter(state=="NY"|state=="NYC"|state=="CA"|state=="TX"|state=="PA"|state=="FL") %>% 
-  select(state, start_date, tot_cases) %>% 
-  pivot_wider(names_from = state,
-              values_from = tot_cases) %>% 
-  mutate(TotalNewYork=NY+NYC) %>% 
-  rename(California=CA, Florida=FL, Pennsylvania=PA, Texas=TX, New_York=TotalNewYork) %>% 
-  pivot_longer(!start_date, 
-               names_to="state",
-               values_to = "total_cases") %>% 
-  filter(state!="NY" & state!="NYC") %>% 
+  select(start_date, new_cases) %>% 
   mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
          year = year(start_date),
-         month = month(start_date))
+         month = month(start_date)) %>% 
+  ggplot(aes(x=start_date, y=new_cases, color=month))+
+  geom_line(linewidth = 1.5)+
+  scale_color_distiller(palette = "Paired")+ 
+  theme_minimal()+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme(title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
+    legend.position = "bottom",
+    legend.text = element_text(size = 20))+
+  labs(title="Total Covid-19 Cases in the U.S. (2019-2023)",
+       x="Months (2019-2023)",
+       y="Total Cases",
+       color="Month Number")
 ```
 
 

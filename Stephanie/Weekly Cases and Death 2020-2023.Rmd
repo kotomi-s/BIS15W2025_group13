@@ -8,6 +8,7 @@ library("tidyverse")
 library("dplyr")
 library("janitor")
 library("lubridate")
+library("ggplot2")
 ```
 
 ```{r}
@@ -18,36 +19,36 @@ options(scipen=999)
 ```{r}
 Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/WeeklyCases.csv") %>% clean_names()
 ```
-```{r}
-glimpse(Weekly)
-```
 
 ```{r}
-Weekly_5 <- Weekly %>% 
+Weekly5 <- Weekly %>% 
   select(state, new_cases, start_date) %>% 
-  filter(state=="CA"|state=="TX"|state=="NYC"|state=="PA"|state=="FL") %>% 
-  mutate(new_date=parse_date_time(start_date, orders = c("mdy"))) %>% 
-  date = seq(from = as.Date("2020-01-16"), to = as.Date("2023-05-04"), by = "month")
-```
-
-mutate(date=format(new_date, "%b %Y"))
-
-```{r}
-glimpse(Weekly_5)
+  filter(state=="CA"|state=="TX"|state=="NYC"|state=="PA"|state=="FL")
 ```
 
 ```{r}
-Weekly_5 %>% 
+Weekly5$date <- as.Date(Weekly5$start_date, format = "%m-%d-%Y")
+```
+
+```{r}
+Weekly5$month_year <- format(Weekly5$start_date, "%b-%Y")
+```
+
+```{r}
+glimpse(Weekly5)
+```
+
+
+```{r}
+Weekly5 %>% 
   group_by(state) %>% 
   select(state, new_cases, date) %>% 
   mutate(week_number=row_number()) %>% 
   ggplot(aes(x=week_number, y=new_cases, color=state))+
   geom_line()+
-  labs(title="Weekly New Cases in California 2020-2023",
-       x="Weeks",
-       y="New Cases")+
-  theme_minimal()+
-  scale_x_date(date_labels="%b-%Y", date_breaks = "1 month")
+  scale_x_continuous(  # Row numbers as x-axis positions
+    breaks=seq(1, nrow(df), by = 4)
+    labels = Weekly5$month_year)
 ```
 
 

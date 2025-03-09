@@ -51,34 +51,24 @@ Weekly5 %>%
        y="New Cases",
        color="State")
 ```
-```{r}
-Weekly %>% 
-  group_by(state) %>% 
-  select(state, new_cases) %>% 
-  filter(state=="CA") %>% 
-  mutate(week_number=row_number()) %>% 
-  ggplot(aes(x=week_number, y=new_cases))+
-  geom_line()+
-  labs(title="Weekly New Cases in California 2020-2023",
-       x="Weeks",
-       y="New Cases")+
-  theme_minimal()
-```
-
 
 ```{r}
 Weekly %>% 
-  group_by(state) %>% 
-  select(state, new_cases) %>% 
-  filter(state=="TX") %>% 
-  mutate(week_number=row_number()) %>% 
-  ggplot(aes(x=week_number, y=new_cases))+
-  geom_line()+
-  labs(title="Weekly New Cases in California 2020-2023",
-       x="Weeks",
-       y="New Cases")+
-  theme_minimal()
+  filter(state=="NY"|state=="NYC"|state=="CA"|state=="TX"|state=="PA"|state=="FL") %>% 
+  select(state, start_date, tot_cases) %>% 
+  pivot_wider(names_from = state,
+              values_from = tot_cases) %>% 
+  mutate(TotalNewYork=NY+NYC) %>% 
+  rename(California=CA, Florida=FL, Pennsylvania=PA, Texas=TX, New_York=TotalNewYork) %>% 
+  pivot_longer(!start_date, 
+               names_to="state",
+               values_to = "total_cases") %>% 
+  filter(state!="NY" & state!="NYC") %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date))
 ```
+
 
 Observations:
 - Where are the peaks?

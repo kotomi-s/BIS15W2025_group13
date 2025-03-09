@@ -19,54 +19,38 @@ options(scipen=999)
 ```{r}
 Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/WeeklyCases.csv") %>% clean_names()
 ```
-
 ```{r}
 Weekly5 <- Weekly %>% 
-  select(state, new_cases, start_date) %>% 
-  filter(state=="CA"|state=="TX"|state=="NYC"|state=="PA"|state=="FL")
-```
-
-```{r}
-Weekly5$date <- as.Date(Weekly5$start_date, format = "%m-%d-%Y")
-```
-
-```{r}
-Weekly5$month_year <- format(Weekly5$start_date, "%b-%Y")
-```
-
-```{r}
-glimpse(Weekly5)
+  filter(state=="NY"|state=="NYC"|state=="CA"|state=="TX"|state=="PA"|state=="FL") %>% 
+  select(state, start_date, new_cases) %>% 
+  pivot_wider(names_from = state,
+              values_from = new_cases) %>% 
+  mutate(TotalNewYork=NY+NYC) %>% 
+  rename(California=CA, Florida=FL, Pennsylvania=PA, Texas=TX, New_York=TotalNewYork) %>% 
+  pivot_longer(!start_date, 
+               names_to="state",
+               values_to = "new_cases") %>% 
+  filter(state!="NY" & state!="NYC") %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date))
 ```
 
 
 ```{r}
 Weekly5 %>% 
   group_by(state) %>% 
-  select(state, new_cases, date) %>% 
-  mutate(week_number=row_number()) %>% 
-  ggplot(aes(x=week_number, y=new_cases, color=state))+
+  ggplot(aes(x=start_date, y=new_cases, color=state))+
   geom_line()+
-  scale_x_continuous(  # Row numbers as x-axis positions
-    breaks=seq(1, nrow(df), by = 4)
-    labels = Weekly5$month_year)
+  theme_minimal()+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "1 months")+
+  theme(legend.position = "bottom",
+    axis.text.x = element_text(size = 7, angle = 70, hjust = 1))+
+  labs(title="Weekly Covid-19 Cases by State in 2019-2023",
+       x="Months (2019-2023)",
+       y="New Cases",
+       color="State")
 ```
-
-
-
-```{r}
-Weekly_5 %>% 
-  group_by(state) %>% 
-  select(state, new_cases) %>% 
-  mutate(week_number=row_number()) %>% 
-  ggplot(aes(x=week_number, y=new_cases, color=state))+
-  geom_line()+
-  labs(title="Weekly New Cases in California 2020-2023",
-       x="Weeks",
-       y="New Cases")+
-  theme_minimal()
-```
-
-graps of new cases and total deaths. top 5 highest states/lowest states. time variable. see how it increases over weeks and seasons
 ```{r}
 Weekly %>% 
   group_by(state) %>% 
@@ -106,16 +90,4 @@ Observations:
 Connections with death?
 - The weeks with most deaths?
 - How much did it collide with new cases
-
-Test to see if save pushes
-
-```{r}
-Weekly %>% 
-  select(state, new_deaths) %>% 
-  arrange(-new_deaths) %>% 
-  filter(state=="CA") %>% 
-  mutate(week_number=row_number()) %>% 
-  ggplot(aes(x=week_number, y=new_deaths))+
-  geom_point()
-```
 

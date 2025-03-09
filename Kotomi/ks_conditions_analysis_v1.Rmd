@@ -1,0 +1,153 @@
+---
+title: "Conditions Contributing to Covid Deaths"
+author: "Kotomi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library("tidyverse")
+library("janitor")
+library(lubridate)
+```
+
+```{r}
+options(scipen=999)
+```
+
+
+```{r}
+conditions <- read.csv("data/conditions_clean.csv")
+```
+
+```{r}
+conditions_states <- read.csv("data/conditions_states.csv")
+```
+
+
+```{r}
+glimpse(conditions)
+```
+
+```{r}
+unique(conditions$condition_group)
+```
+```{r}
+unique(conditions$condition)
+```
+```{r}
+unique(conditions$age_group)
+```
+
+
+Compare number of deaths associated with each condition group. Separate by age group. *faceting doesn't look great for this so I will make individual plots
+```{r}
+conditions %>% 
+  filter(group=="By Total"& state=="United States" & age_group=="0-24" & 
+           condition_group != "COVID-19" & 
+           condition_group!="All other conditions and causes (residual)" & 
+           condition_group!="Intentional and unintentional injury, poisoning, and other adverse events") %>% 
+  #filtered several conditions out bc i think it would be best to focus on non-COVID health conditions. it also simplifies the plot
+  group_by(condition_group, age_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths),
+            .groups = "keep") %>% 
+  ggplot(aes(x=reorder(condition_group, total_deaths), y=total_deaths))+
+  geom_col()+
+  theme_minimal()+
+  coord_flip()+
+  labs(title = "Conditions Groups Contributing to COVID-19 Deaths, Ages 0-24 years",
+       x = "Condition Group",
+       y = "Associated Deaths")+
+  theme(title = element_text(size = rel(0.8), hjust = 0.5))
+```
+
+```{r}
+conditions %>% 
+  filter(group=="By Total"& state=="United States" & age_group=="25-34" & 
+           condition_group != "COVID-19" & 
+           condition_group!="All other conditions and causes (residual)" & 
+           condition_group!="Intentional and unintentional injury, poisoning, and other adverse events") %>% 
+  group_by(condition_group, age_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths),
+            .groups = "keep") %>% 
+  ggplot(aes(x=reorder(condition_group, total_deaths), y=total_deaths))+
+  geom_col()+
+  theme_linedraw()+
+  coord_flip()+
+  labs(title = "Conditions Groups Contributing to COVID-19 Deaths, Ages 25-34 years",
+       x = "Condition Group",
+       y = "Associated Deaths")+
+  theme(title = element_text(size = rel(0.8), hjust = 0.5))
+```
+
+```{r}
+conditions %>% 
+  filter(group=="By Total"& state=="United States" & age_group=="35-44" & 
+           condition_group != "COVID-19" & 
+           condition_group!="All other conditions and causes (residual)" & 
+           condition_group!="Intentional and unintentional injury, poisoning, and other adverse events") %>% 
+  group_by(condition_group, age_group) %>% 
+  summarise(total_deaths=sum(covid_19_deaths),
+            .groups = "keep") %>% 
+  ggplot(aes(x=reorder(condition_group, total_deaths), y=total_deaths))+
+  geom_col()+
+  theme_linedraw()+
+  coord_flip()+
+  labs(title = "Conditions Groups Contributing to COVID-19 Deaths, Ages 35-44 years",
+       x = "Condition Group",
+       y = "Associated Deaths")+
+  theme(title = element_text(size = rel(0.8), hjust = 0.5))
+```
+
+
+COVID-19 deaths associated with circulatory disease in California, 2020.
+```{r}
+conditions_states %>% 
+  filter(group=="By Month", year=="2020") %>%
+  group_by(year, month, state) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm=T),
+            .groups = "drop") %>% 
+  ggplot(aes(x=month, y=total_covid_deaths, color = state))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:12)+
+  theme_minimal()
+```
+
+
+
+working with hiya's code
+```{r}
+conditions_states <- conditions_states %>%
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         end_date = as.Date(end_date, format = "%m/%d/%Y"))
+```
+
+```{r}
+glimpse(data)
+```
+```{r}
+
+conditions_states %>% 
+  filter(group=="By Month") %>% 
+  group_by(state, start_date) %>% 
+  summarise(total_covid_deaths=sum(covid_19_deaths, na.rm = T),
+            .groups = "drop") %>% 
+ggplot(aes(x = start_date, y = total_covid_deaths, color = state, group = state)) +
+  geom_line() +
+  labs(title = "COVID-19 Deaths by State and Month", x = "Date", y = "Total Deaths", color = "State") +
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 70, hjust = 1))
+
+```
+
+
+
+
+

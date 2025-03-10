@@ -20,6 +20,14 @@ options(scipen=999)
 ```{r}
 Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/WeeklyCases.csv") %>% clean_names()
 ```
+
+
+
+
+
+
+##NEW CASES
+
 ```{r}
 Weekly5 <- Weekly %>% 
   filter(state=="NY"|state=="NYC"|state=="CA"|state=="TX"|state=="PA"|state=="FL") %>% 
@@ -97,7 +105,7 @@ Weekly %>%
 
 
 
-TOTAL CASES
+##TOTAL CASES
 
 ```{r}
 WeeklyTotal <- Weekly %>% 
@@ -168,7 +176,7 @@ WeeklyTotal %>%
 ```
 
 
-
+Double Checking
 ```{r}
 Weekly %>% 
   select(start_date, tot_cases) %>% 
@@ -177,7 +185,18 @@ Weekly %>%
 ```
 
 
-
+##HISTORIC CASES
+```{r}
+Weekly %>% 
+  select(start_date, new_historic_cases, state) %>% 
+  pivot_wider(names_from = state, 
+              values_from = new_historic_cases) %>% 
+  mutate(total = sum(c_across(AK:WY))) %>% 
+  select(start_date, total) %>% 
+  pivot_longer(!start_date,
+               names_to = "totalUS",
+               values_to = "new_historic")
+```
 
 
 

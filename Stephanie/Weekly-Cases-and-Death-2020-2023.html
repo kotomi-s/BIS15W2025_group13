@@ -386,6 +386,7 @@ library(&quot;RColorBrewer&quot;)</code></pre>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>##NEW CASES</p>
 <pre class="r"><code>Weekly5 &lt;- Weekly %&gt;% 
   filter(state==&quot;NY&quot;|state==&quot;NYC&quot;|state==&quot;CA&quot;|state==&quot;TX&quot;|state==&quot;PA&quot;|state==&quot;FL&quot;) %&gt;% 
   select(state, start_date, new_cases) %&gt;% 
@@ -439,7 +440,7 @@ Weekly %&gt;%
        x=&quot;Months (2019-2023)&quot;,
        y=&quot;New Cases&quot;,
        color=&quot;Month Number&quot;)</code></pre>
-<p>TOTAL CASES</p>
+<p>##TOTAL CASES</p>
 <pre class="r"><code>WeeklyTotal &lt;- Weekly %&gt;% 
   select(state, start_date, tot_cases) %&gt;% 
   group_by(start_date, state) %&gt;% 
@@ -469,19 +470,44 @@ WeeklyTotal %&gt;%
        x=&quot;Months (2019-2023)&quot;,
        y=&quot;Total Cases&quot;,
        color=&quot;Month Number&quot;)</code></pre>
-<p>png(filename = “TotalCovid19CasesintheUS(2021-2023).png”, width =
-1200, height = 720, units = “px”)</p>
-<p>total covid cases by state starting JAN 2021</p>
-<pre class="r"><code>png(filename = &quot;LaterTotalCovid19CasesintheUS(2021-2023).png&quot;, width = 1200, height = 720, units = &quot;px&quot;)
-WeeklyTotal %&gt;% 
-  select(start_date, tot_cases) %&gt;% 
+<p>png(filename = “April2021-2023 cases total by state(2021-2023).png”,
+width = 1200, height = 720, units = “px”)</p>
+<p>##total covid cases by state starting April 2021 - July 2023</p>
+<p>Organize 5 states with total cases</p>
+<pre class="r"><code>Weekly5Total &lt;- Weekly %&gt;% 
+  filter(state==&quot;NY&quot;|state==&quot;NYC&quot;|state==&quot;CA&quot;|state==&quot;TX&quot;|state==&quot;PA&quot;|state==&quot;FL&quot;) %&gt;% 
+  select(state, start_date, tot_cases) %&gt;% 
+  pivot_wider(names_from = state,
+              values_from = tot_cases) %&gt;% 
+  mutate(TotalNewYork=NY+NYC) %&gt;% 
+  rename(California=CA, Florida=FL, Pennsylvania=PA, Texas=TX, New_York=TotalNewYork) %&gt;% 
+  pivot_longer(!start_date, 
+               names_to=&quot;state&quot;,
+               values_to = &quot;tot_cases&quot;) %&gt;% 
+  filter(state!=&quot;NY&quot; &amp; state!=&quot;NYC&quot;) %&gt;% 
+  mutate(start_date = as.Date(start_date, format = &quot;%m/%d/%Y&quot;),
+         year = year(start_date),
+         month = month(start_date))</code></pre>
+<p>Organize all states into total count</p>
+<p>Weekly5TotalFinal &lt;- Weekly5Total %&gt;% select(state, start_date,
+tot_cases) %&gt;% group_by(start_date, state) %&gt;%
+pivot_wider(names_from = state, values_from = tot_cases) %&gt;%
+mutate(total = sum(c_across(California:New_York))) %&gt;%
+select(start_date, total) %&gt;% pivot_longer(!start_date, names_to =
+“totalUS”, values_to = “tot_cases”) %&gt;% mutate(start_date =
+as.Date(start_date, format = “%m/%d/%Y”), year = year(start_date), month
+= month(start_date))</p>
+<pre class="r"><code>png(filename = &quot;April2021-2023 cases total by state(2021-2023).png&quot;, width = 1200, height = 720, units = &quot;px&quot;)
+Weekly5Total %&gt;% 
+  select(state, start_date, tot_cases) %&gt;% 
   mutate(start_date = as.Date(start_date, format = &quot;%m/%d/%Y&quot;),
          year = year(start_date),
          month = month(start_date)) %&gt;% 
   filter(year==&quot;2021&quot;|year==&quot;2022&quot;|year==&quot;2023&quot;) %&gt;% 
-  ggplot(aes(x=start_date, y=tot_cases, color=month))+
+  filter(start_date!=&quot;2021-01-07&quot; &amp; start_date!=&quot;2021-01-14&quot; &amp; start_date!=&quot;2021-01-21&quot; &amp; start_date!=&quot;2021-01-28&quot; &amp; start_date!=&quot;2021-02-04&quot; &amp; start_date!=&quot;2021-02-11&quot; &amp; start_date!=&quot;2021-02-18&quot; &amp; start_date!=&quot;2021-02-25&quot; &amp; start_date!=&quot;2021-03-04&quot; &amp; start_date!=&quot;2021-03-11&quot; &amp; start_date!=&quot;2021-03-18&quot; &amp; start_date!=&quot;2021-03-25&quot;) %&gt;% 
+  ggplot(aes(x=start_date, y=tot_cases, color=state))+
   geom_line(linewidth = 1.5)+
-  scale_color_distiller(palette = &quot;Paired&quot;)+ 
+  scale_color_brewer(palette = &quot;Paired&quot;)+ 
   theme_minimal()+
   scale_x_date(labels = scales::date_format(&quot;%b %Y&quot;), breaks = &quot;2 months&quot;)+
   theme(title = element_text(size=28),
@@ -489,10 +515,11 @@ WeeklyTotal %&gt;%
     axis.text.y = element_text(size = 16),
     legend.position = &quot;bottom&quot;,
     legend.text = element_text(size = 20))+
-  labs(title=&quot;Total Covid-19 Cases in U.S. Territories (2021-2023)&quot;,
+  labs(title=&quot;Total Covid-19 Cases by State (2021-2023)&quot;,
        x=&quot;Months (2021-2023)&quot;,
        y=&quot;Total Cases&quot;,
-       color=&quot;Month Number&quot;)</code></pre>
+       color=&quot;State&quot;)</code></pre>
+<p>Double Checking</p>
 <pre class="r"><code>Weekly %&gt;% 
   select(start_date, tot_cases) %&gt;% 
   filter(start_date==&quot;05/04/2023&quot;) %&gt;% 
@@ -501,6 +528,38 @@ WeeklyTotal %&gt;%
 ##       total
 ##       &lt;dbl&gt;
 ## 1 104722264</code></pre>
+<pre class="r"><code>Weekly5Total %&gt;% 
+  select(start_date, tot_cases) %&gt;% 
+  filter(start_date==&quot;2023-05-04&quot;) %&gt;% 
+  summarize(total=sum(tot_cases))</code></pre>
+<pre><code>## # A tibble: 1 × 1
+##      total
+##      &lt;dbl&gt;
+## 1 38730406</code></pre>
+<p>##HISTORIC CASES</p>
+<pre class="r"><code>Weekly %&gt;% 
+  select(start_date, new_historic_cases, state) %&gt;% 
+  pivot_wider(names_from = state, 
+              values_from = new_historic_cases) %&gt;% 
+  mutate(total = sum(c_across(AK:WY))) %&gt;% 
+  select(start_date, total) %&gt;% 
+  pivot_longer(!start_date,
+               names_to = &quot;totalUS&quot;,
+               values_to = &quot;new_historic&quot;)</code></pre>
+<pre><code>## # A tibble: 173 × 3
+##    start_date totalUS new_historic
+##    &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt;
+##  1 01/16/2020 total          64736
+##  2 01/23/2020 total          64736
+##  3 01/30/2020 total          64736
+##  4 02/06/2020 total          64736
+##  5 02/13/2020 total          64736
+##  6 02/20/2020 total          64736
+##  7 02/27/2020 total          64736
+##  8 03/05/2020 total          64736
+##  9 03/12/2020 total          64736
+## 10 03/19/2020 total          64736
+## # ℹ 163 more rows</code></pre>
 <p>Observations: - Where are the peaks? - Do some research, why the
 sudden peaks? - What is the highest peak? - Which seasons/months were
 the highest peaks? Maybe start of new school session or holidays like

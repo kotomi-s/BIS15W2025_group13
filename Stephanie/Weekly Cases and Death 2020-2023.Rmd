@@ -148,20 +148,58 @@ WeeklyTotal %>%
 
 
 
-png(filename = "TotalCovid19CasesintheUS(2021-2023).png", width = 1200, height = 720, units = "px")
+png(filename = "April2021-2023 cases total by state(2021-2023).png", width = 1200, height = 720, units = "px")
 
-total covid cases by state starting JAN 2021
+##total covid cases by state starting April 2021 - July 2023
+
+Organize 5 states with total cases
 ```{r}
-png(filename = "LaterTotalCovid19CasesintheUS(2021-2023).png", width = 1200, height = 720, units = "px")
-WeeklyTotal %>% 
-  select(start_date, tot_cases) %>% 
+Weekly5Total <- Weekly %>% 
+  filter(state=="NY"|state=="NYC"|state=="CA"|state=="TX"|state=="PA"|state=="FL") %>% 
+  select(state, start_date, tot_cases) %>% 
+  pivot_wider(names_from = state,
+              values_from = tot_cases) %>% 
+  mutate(TotalNewYork=NY+NYC) %>% 
+  rename(California=CA, Florida=FL, Pennsylvania=PA, Texas=TX, New_York=TotalNewYork) %>% 
+  pivot_longer(!start_date, 
+               names_to="state",
+               values_to = "tot_cases") %>% 
+  filter(state!="NY" & state!="NYC") %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date))
+```
+
+
+Organize all states into total count
+
+Weekly5TotalFinal <- Weekly5Total %>% 
+  select(state, start_date, tot_cases) %>% 
+  group_by(start_date, state) %>% 
+  pivot_wider(names_from = state, 
+            values_from = tot_cases) %>% 
+  mutate(total = sum(c_across(California:New_York))) %>% 
+  select(start_date, total) %>% 
+  pivot_longer(!start_date,
+               names_to = "totalUS",
+               values_to = "tot_cases") %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date))
+
+
+```{r}
+png(filename = "April2021-2023 cases total by state(2021-2023).png", width = 1200, height = 720, units = "px")
+Weekly5Total %>% 
+  select(state, start_date, tot_cases) %>% 
   mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
          year = year(start_date),
          month = month(start_date)) %>% 
   filter(year=="2021"|year=="2022"|year=="2023") %>% 
-  ggplot(aes(x=start_date, y=tot_cases, color=month))+
+  filter(start_date!="2021-01-07" & start_date!="2021-01-14" & start_date!="2021-01-21" & start_date!="2021-01-28" & start_date!="2021-02-04" & start_date!="2021-02-11" & start_date!="2021-02-18" & start_date!="2021-02-25" & start_date!="2021-03-04" & start_date!="2021-03-11" & start_date!="2021-03-18" & start_date!="2021-03-25") %>% 
+  ggplot(aes(x=start_date, y=tot_cases, color=state))+
   geom_line(linewidth = 1.5)+
-  scale_color_distiller(palette = "Paired")+ 
+  scale_color_brewer(palette = "Paired")+ 
   theme_minimal()+
   scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
   theme(title = element_text(size=28),
@@ -169,11 +207,12 @@ WeeklyTotal %>%
     axis.text.y = element_text(size = 16),
     legend.position = "bottom",
     legend.text = element_text(size = 20))+
-  labs(title="Total Covid-19 Cases in U.S. Territories (2021-2023)",
+  labs(title="Total Covid-19 Cases by State (2021-2023)",
        x="Months (2021-2023)",
        y="Total Cases",
-       color="Month Number")
+       color="State")
 ```
+
 
 
 Double Checking
@@ -181,6 +220,13 @@ Double Checking
 Weekly %>% 
   select(start_date, tot_cases) %>% 
   filter(start_date=="05/04/2023") %>% 
+  summarize(total=sum(tot_cases))
+```
+
+```{r}
+Weekly5Total %>% 
+  select(start_date, tot_cases) %>% 
+  filter(start_date=="2023-05-04") %>% 
   summarize(total=sum(tot_cases))
 ```
 

@@ -63,7 +63,7 @@ display.brewer.pal(12,"Paired")
 ```
 
 ```{r}
-png(filename = "TotalCovid19CasesintheUS.png", width = 1200, height = 720, units = "px")
+png(filename = "NewCovid19CasesintheUS.png", width = 1200, height = 720, units = "px")
 Weekly %>% 
   select(start_date, new_cases) %>% 
   mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
@@ -79,11 +79,107 @@ Weekly %>%
     axis.text.y = element_text(size = 16),
     legend.position = "bottom",
     legend.text = element_text(size = 20))+
-  labs(title="Total Covid-19 Cases in the U.S. (2019-2023)",
+  labs(title="New Covid-19 Cases in U.S. Territories (2019-2023)",
+       x="Months (2019-2023)",
+       y="New Cases",
+       color="Month Number")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+TOTAL CASES
+
+```{r}
+WeeklyTotal <- Weekly %>% 
+  select(state, start_date, tot_cases) %>% 
+  group_by(start_date, state) %>% 
+  pivot_wider(names_from = state, 
+              values_from = tot_cases) %>% 
+  mutate(total = sum(c_across(AK:WY))) %>% 
+  select(start_date, total) %>% 
+  pivot_longer(!start_date,
+               names_to = "totalUS",
+               values_to = "tot_cases")
+```
+
+
+
+```{r}
+png(filename = "AllYearsTotalCovid19CasesintheUS(2019-2023).png", width = 1200, height = 720, units = "px")
+WeeklyTotal %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date)) %>% 
+  ggplot(aes(x=start_date, y=tot_cases, color=month))+
+  geom_line(linewidth = 1.5)+
+  scale_color_distiller(palette = "Paired")+ 
+  theme_minimal()+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme(title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
+    legend.position = "bottom",
+    legend.text = element_text(size = 20))+
+  labs(title="Total Covid-19 Cases in U.S. Territories (2019-2023)",
        x="Months (2019-2023)",
        y="Total Cases",
        color="Month Number")
 ```
+
+
+
+
+
+png(filename = "TotalCovid19CasesintheUS(2021-2023).png", width = 1200, height = 720, units = "px")
+
+total covid cases by state starting JAN 2021
+```{r}
+png(filename = "LaterTotalCovid19CasesintheUS(2021-2023).png", width = 1200, height = 720, units = "px")
+WeeklyTotal %>% 
+  select(start_date, tot_cases) %>% 
+  mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"),
+         year = year(start_date),
+         month = month(start_date)) %>% 
+  filter(year=="2021"|year=="2022"|year=="2023") %>% 
+  ggplot(aes(x=start_date, y=tot_cases, color=month))+
+  geom_line(linewidth = 1.5)+
+  scale_color_distiller(palette = "Paired")+ 
+  theme_minimal()+
+  scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months")+
+  theme(title = element_text(size=28),
+    axis.text.x = element_text(size = 16, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 16),
+    legend.position = "bottom",
+    legend.text = element_text(size = 20))+
+  labs(title="Total Covid-19 Cases in U.S. Territories (2021-2023)",
+       x="Months (2021-2023)",
+       y="Total Cases",
+       color="Month Number")
+```
+
+
+
+```{r}
+Weekly %>% 
+  select(start_date, tot_cases) %>% 
+  filter(start_date=="05/04/2023") %>% 
+  summarize(total=sum(tot_cases))
+```
+
+
+
+
+
 
 
 Observations:

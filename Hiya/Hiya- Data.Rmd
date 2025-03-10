@@ -44,9 +44,197 @@ ggplot(df_clean, aes(x = date, y = total_deaths, color = state, group = state)) 
   geom_line() +
   labs(title = "COVID-19 Deaths by State and Month", x = "Date", y = "Total Deaths", color = "State") +
   scale_x_date(labels = scales::date_format("%b %Y"), breaks = "2 months") +
-  theme(
+   theme_minimal()+
+  scale_colour_brewer(palette = "Paired")+ #indicate the color palette
+  theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
+    title = element_text(size=10),
+    axis.text.x = element_text(size = 8, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 8),
     legend.position = "bottom",
-    axis.text.x = element_text(angle = 70, hjust = 1))
+    legend.text = element_text(size = 10))
+
+
+```
+```{r}
+tiktok_data <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/Sanchari/tiktok_data_open.csv")
+```
+
+```{r}
+glimpse(tiktok_data)
+```
+```{r}
+library(tidyverse)
+
+tiktok_data <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/Sanchari/tiktok_data_open.csv", stringsAsFactors = FALSE, check.names = FALSE)
+
+if (any(is.na(names(tiktok_data)))) {
+  names(tiktok_data)[is.na(names(tiktok_data))] <- paste0("Unnamed_", seq_along(names(tiktok_data))[is.na(names(tiktok_data))])
+}
+
+print(names(tiktok_data))
+
+missing_values <- colSums(is.na(tiktok_data))
+print(missing_values)
+
+tiktok_data <- tiktok_data[, colSums(is.na(tiktok_data)) < nrow(tiktok_data)]
+
+new_col_names <- c("views", "likes", "comments", "official_source", "pub_hcp", "pub_news", 
+                   "pub_patient", "pub_other", "female", "gender_other", "age_00", "age_30", 
+                   "age_50", "age_unknown", "topic_humor", "topic_ip", "topic_clinical", 
+                   "desc_risk_factors", "desc_symptoms", "transmission_modes", "masks", 
+                   "demonstrate_mask", "eye_protection", "hand_hygiene", "social_distancing", 
+                   "testing", "prevention_discussed")
+
+if (length(new_col_names) == ncol(tiktok_data)) {
+  colnames(tiktok_data) <- new_col_names
+} else {
+  warning("Column count mismatch. Skipping renaming step.")
+}
+
+binary_cols <- intersect(c("official_source", "pub_hcp", "pub_news", "pub_patient", "pub_other", 
+                           "female", "gender_other", "topic_humor", "topic_ip", "topic_clinical", 
+                           "desc_risk_factors", "desc_symptoms", "transmission_modes", "masks", 
+                           "demonstrate_mask", "eye_protection", "hand_hygiene", "social_distancing", 
+                           "testing", "prevention_discussed"), colnames(tiktok_data))
+
+tiktok_data[binary_cols] <- lapply(tiktok_data[binary_cols], factor)
+
+if (all(c("age_00", "age_30", "age_50", "age_unknown") %in% colnames(tiktok_data))) {
+  tiktok_data$age_group <- factor(ifelse(tiktok_data$age_00 == 1, "0-29",
+                                   ifelse(tiktok_data$age_30 == 1, "30-49",
+                                   ifelse(tiktok_data$age_50 == 1, "50+", "Unknown"))))
+  
+  tiktok_data <- tiktok_data %>% select(-age_00, -age_30, -age_50, -age_unknown)
+}
+
+tiktok_data <- tiktok_data %>% distinct()
+
+write.csv(tiktok_data, "cleaned_tiktok_data.csv", row.names = FALSE)
+
 
 ```
 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+options(scipen = 999) 
+
+tiktok_data <- tiktok_data %>%
+  mutate(across(everything(), as.numeric))
+
+head(tiktok_data)
+
+
+sentiment_data <- tiktok_data %>%
+  mutate(sentiment_category = case_when(
+    masksent_pos > masksent_neg & masksent_pos > masksent_neu ~ "Positive",
+    masksent_neg > masksent_pos & masksent_neg > masksent_neu ~ "Negative",
+    masksent_neu > masksent_pos & masksent_neu > masksent_neg ~ "Neutral",
+    TRUE ~ "Mixed"
+  )) %>%
+  group_by(sentiment_category) %>%
+  summarize(avg_views = mean(views, na.rm = TRUE))
+
+ggplot(sentiment_data, aes(x = sentiment_category, y = avg_views, fill = sentiment_category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Impact of Mask Sentiment on TikTok Views",
+       x = "Mask Sentiment",
+       y = "Average Views") +
+   theme_minimal()+
+  scale_colour_brewer(palette = "Paired")+ #indicate the color palette
+  theme( #this whole code chunk can be copy-pasted for consistent formatting of title, axis labels, legends
+    title = element_text(size=10),
+    axis.text.x = element_text(size = 8, angle = 70, hjust = 1),
+    axis.text.y = element_text(size = 8),
+    legend.position = "bottom",
+    legend.text = element_text(size = 10))
+
+```
+
+```{r}
+totals <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/conditions_states.csv")
+glimpse(totals)
+```
+
+
+```{r}
+library(shiny)
+library(tidyverse)
+library(shinydashboard)
+
+totals <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/conditions_states.csv")
+
+ui <- dashboardPage(
+  dashboardHeader(title = "COVID-19 Death Trends"),
+  
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("chart-line")),
+      
+      radioButtons("condition_select", 
+                   "Select Condition Group", 
+                   choices = c("Respiratory diseases", "Circulatory diseases"),
+                   selected = "Respiratory diseases"),
+      
+      radioButtons("age_group_select",
+                   "Select Age Group",
+                   choices = unique(totals$age_group)[!unique(totals$age_group) %in% c("Not stated", "All ages")],
+                   selected = "0-24")
+    )
+  ),
+  
+  dashboardBody(
+    fluidRow(
+      box(
+        title = "COVID-19 Deaths Trend",
+        status = "primary", solidHeader = TRUE, width = 12,
+        plotOutput("death_line_plot", height = 500)
+      )
+    ),
+    fluidRow(
+      box(
+        title = "Data Summary",
+        status = "info", solidHeader = TRUE, width = 12,
+        tableOutput("summary_table")
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  filtered_data <- reactive({
+    totals %>%
+      filter(condition_group == input$condition_select, 
+             age_group == input$age_group_select) %>%
+      drop_na(covid_19_deaths, start_date) %>%
+      mutate(start_date = as.Date(start_date, format = "%m/%d/%Y"))
+  })
+  
+  output$death_line_plot <- renderPlot({
+    data <- filtered_data()
+    
+    ggplot(data, aes(x = start_date, y = covid_19_deaths, color = condition)) +
+      geom_line() +
+      labs(title = paste("COVID-19 Death Trend for", input$condition_select, "in Age Group", input$age_group_select),
+           x = "Date", y = "COVID-19 Deaths") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$summary_table <- renderTable({
+    data <- filtered_data()
+    
+    summary_data <- data %>%
+      group_by(condition, age_group) %>%
+      summarise(total_deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop')
+    
+    summary_data
+  })
+}
+
+shinyApp(ui, server)
+
+```

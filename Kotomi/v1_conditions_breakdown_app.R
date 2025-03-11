@@ -3,10 +3,8 @@ library(shiny)
 library(tidyverse)
 library(shinydashboard)
 
-# Load data
 totals <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/conditions_states.csv")
 
-# UI with shinydashboard
 ui <- dashboardPage(
   dashboardHeader(title = "COVID-19 Death Analysis"),
   
@@ -20,9 +18,13 @@ ui <- dashboardPage(
                    inline = TRUE),
       radioButtons("x",
                    "Select X Variable",
-                   choices = c("state", "age_group"),
+                   choices = c("state"),
                    selected = "state",
-                   inline = TRUE)
+                   inline = TRUE),
+      selectInput("age_type",
+                  "Select Age Type",
+                  choices = unique(totals$age_group),
+                  selected = unique(totals$age_group)[1])
     )
   ),
   
@@ -48,9 +50,8 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   output$plot <- renderPlot({
-    
     totals %>% 
-      filter(condition_group == input$y) %>% 
+      filter(condition_group == input$y, age_group == input$age_type) %>% 
       group_by(.data[[input$x]], condition) %>% 
       summarise(deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop') %>% 
       ggplot(aes(x = factor(.data[[input$x]]), y = deaths, fill = condition)) +
@@ -62,13 +63,12 @@ server <- function(input, output, session) {
            x = input$x,
            y = NULL,
            fill = "Condition") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotating x-axis labels for better readability
-    
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
   output$summary <- renderText({
     filtered_data <- totals %>%
-      filter(condition_group == input$y) %>%
+      filter(condition_group == input$y, age_group == input$age_type) %>%
       group_by(.data[[input$x]], condition) %>%
       summarise(deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop')
     
@@ -77,9 +77,6 @@ server <- function(input, output, session) {
           "Number of unique states or age groups:", length(unique(filtered_data[[input$x]])), "\n",
           "Data includes", nrow(filtered_data), "records.")
   })
-  
 }
 
-# Run the app
 shinyApp(ui, server)
-

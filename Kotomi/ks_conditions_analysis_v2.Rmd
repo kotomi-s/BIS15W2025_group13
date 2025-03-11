@@ -51,7 +51,7 @@ totals <- totals %>%
 show trends across all 3 years, all deaths **hiya already doing this, just checking overall trends
 ```{r}
 
-#png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #exporting this plot as a png, defining file name and dimensions
+png(filename = "alldeaths.png", width = 1200, height = 720, units = "px") #exporting this plot as a png, defining file name and dimensions
 
 monthly %>%
   group_by(state, start_date) %>% 
@@ -299,7 +299,31 @@ ggplot(aes(x = age_group, y = total_covid_deaths, fill=condition_group)) +
   facet_grid(state~.)
 ```
 
-
+barplot showing the number of reported deaths in each state, in age groups 0-24 and 25-34
+```{r}
+png(filename = "reported_deaths_ages_0_34.png", width = 1200, height = 720, units = "px")
+totals %>% 
+  filter(age_group=="0-24" |
+           age_group=="25-34") %>% 
+  group_by(age_group, condition_group, state) %>% 
+  summarise(deaths=sum(covid_19_deaths, na.rm = T),
+            .groups = 'drop') %>% 
+  ggplot(aes(x=state, y=deaths, fill=state))+
+  geom_col(show.legend = F)+
+  scale_fill_brewer(palette = "Paired", labels = function(x) str_wrap(x, width = 40))+ #applies text in the legend wrapping at ~40 characters?
+  theme_minimal()+
+  labs(title = "Reported COVID-19 Deaths in Age groups 0-24 and 25-34",
+       x= "State",
+       y="Deaths",
+       fill="State")+
+  facet_grid(.~age_group)+
+  theme( 
+    title = element_text(size=28),
+    axis.text.x = element_text(hjust = 0.5, size = 20, angle = 50, margin = margin(25)), 
+    axis.text.y = element_text(size = 15),
+    strip.text = element_text(size = 25),
+    plot.margin = unit(c(1,1,1,1), "cm"))
+```
 
 shiny app time! the idea is to have the user be able to select a condition group another variable (state, age group). shiny app is in a separate R script.
 

@@ -1,10 +1,14 @@
-
 library(shiny)
 library(tidyverse)
 library(shinydashboard)
+library(shinyjs)
+library(plotly)  # Add plotly for interactive plots
 
 # Load data
 totals <- read.csv("/Users/hiyabhandari/Desktop/BIS15W2025_group13/conditions_states.csv")
+
+# Filter out "not states" from age_group
+totals <- totals %>% filter(age_group != "Not states")
 
 # UI with shinydashboard
 ui <- dashboardPage(
@@ -20,18 +24,46 @@ ui <- dashboardPage(
                    inline = TRUE),
       radioButtons("x",
                    "Select X Variable",
-                   choices = c("state", "age_group"),
+                   choices = c("state"),
                    selected = "state",
-                   inline = TRUE)
+                   inline = TRUE),
+      selectInput("age_type",
+                  "Select Age Type",
+                  choices = unique(totals$age_group),
+                  selected = unique(totals$age_group)[1])
     )
   ),
   
   dashboardBody(
+    # Use shinyjs to include custom JavaScript for added effects
+    useShinyjs(),
+    
+    # Add custom CSS for a fancier look
+    tags$head(
+      tags$style(HTML("
+        .box {
+          background-color: #f4f6f9;
+          border-radius: 10px;
+        }
+        .box-header {
+          background-color: #17a2b8;
+          color: white;
+        }
+        .box-title {
+          font-size: 1.5em;
+          font-weight: bold;
+        }
+        .shiny-output-error-validation {
+          color: red;
+        }
+      "))
+    ),
+    
     fluidRow(
       box(
         title = "COVID-19 Deaths Breakdown",
         status = "primary", solidHeader = TRUE, width = 12,
-        plotOutput("plot", height = 500)
+        plotlyOutput("plot", height = 500)  # Use plotlyOutput here
       )
     ),
     fluidRow(
@@ -47,13 +79,13 @@ ui <- dashboardPage(
 # Server function
 server <- function(input, output, session) {
   
-  output$plot <- renderPlot({
-    
-    totals %>% 
-      filter(condition_group == input$y) %>% 
+  output$plot <- renderPlotly({
+    plot_data <- totals %>% 
+      filter(condition_group == input$y, age_group == input$age_type) %>% 
       group_by(.data[[input$x]], condition) %>% 
-      summarise(deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop') %>% 
-      ggplot(aes(x = factor(.data[[input$x]]), y = deaths, fill = condition)) +
+      summarise(deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop')
+    
+    plot <- ggplot(plot_data, aes(x = factor(.data[[input$x]]), y = deaths, fill = condition, text = paste("Deaths:", deaths))) +
       geom_col(position = position_fill()) +
       scale_y_continuous(labels = scales::percent_format(scale = 1)) +
       scale_fill_brewer(palette = "Set2", labels = function(x) str_wrap(x, width = 40)) +
@@ -62,13 +94,15 @@ server <- function(input, output, session) {
            x = input$x,
            y = NULL,
            fill = "Condition") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotating x-axis labels for better readability
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
+    # Convert the ggplot to a plotly object to enable interactivity
+    ggplotly(plot, tooltip = "text")  # Tooltip will display the deaths count
   })
   
   output$summary <- renderText({
     filtered_data <- totals %>%
-      filter(condition_group == input$y) %>%
+      filter(condition_group == input$y, age_group == input$age_type) %>%
       group_by(.data[[input$x]], condition) %>%
       summarise(deaths = sum(covid_19_deaths, na.rm = TRUE), .groups = 'drop')
     
@@ -77,9 +111,7 @@ server <- function(input, output, session) {
           "Number of unique states or age groups:", length(unique(filtered_data[[input$x]])), "\n",
           "Data includes", nrow(filtered_data), "records.")
   })
-  
 }
 
 # Run the app
 shinyApp(ui, server)
-

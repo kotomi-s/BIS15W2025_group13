@@ -231,7 +231,7 @@ Weekly5Total %>%
 ```
 
 
-##HISTORIC CASES
+##HISTORIC CASES (already added in Total Cases) DELETE
 ```{r}
 Weekly %>% 
   select(start_date, new_historic_cases, state) %>% 
@@ -245,6 +245,10 @@ Weekly %>%
 ```
 
 
+```{r}
+Weekly5 %>% 
+  filter(state=="New_York")
+```
 
 
 Observations:

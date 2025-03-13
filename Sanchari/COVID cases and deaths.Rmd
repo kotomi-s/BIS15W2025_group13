@@ -18,17 +18,20 @@ When you click the **Knit** button a document will be generated that includes bo
 library(tidyverse)
 library(janitor)
 library(naniar)
+library(scales)
+options(scipen=999)
 ```
 
 ```{r}
-COVID_Cases <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/covid_confirmed_usafacts.csv")
-COVID_Deaths <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/covid_deaths_usafacts.csv")
+COVID_Cases <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/Datas/covid_confirmed_usafacts.csv")
+COVID_Deaths <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/Datas/covid_deaths_usafacts.csv")
 ```
 
 ```{r}
 COVID_Cases_long <- COVID_Cases %>% 
   pivot_longer(-c(countyFIPS, County.Name, State, StateFIPS),names_to = "Date", values_to = "Cases")
 ```
+
 
 ```{r}
 COVID_Cases_long %>% 
@@ -49,10 +52,26 @@ COVID_Cases_long %>%
 ```{r}
 COVID_Cases_long %>% 
   group_by(State, Date) %>% 
-  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
   summarise(average_affected=mean(Cases, na.rm = T), .groups = "keep") %>% 
 
-  ggplot(aes(x=Date, y=average_affected, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Cases in the Ten Most Affected States", x="Time", y="Average Cases")
+  ggplot(aes(x=Date, y=average_affected, group = State, colour = State))+geom_line(size=0.5)+labs(title = "COVID-19 Cases by States (2020-2023)", x="Time", y="Average Cases")+theme(legend.position = "bottom")+theme_light()
+```
+
+```{r}
+COVID_Cases_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
+  summarise(average_affected=mean(Cases, na.rm = T), .groups = "keep") %>% 
+  ggplot(aes(x=Date, y=average_affected, group = State, fill = State))+geom_col()+labs(title = "COVID-19 Cases Over Time by States (2020-2023)", x="Time", y="Average Cases")+theme(legend.position = "bottom")+theme_light()
+```
+
+```{r}
+COVID_Cases_long %>% 
+  group_by(State, Date) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
+  summarise(average_affected=mean(Cases, na.rm = T), .groups = "keep") %>% 
+  ggplot(aes(x=State, y=average_affected, group = State, fill = State))+geom_col()+labs(title = "COVID-19 Cases by States (2020-2023)", x="State", y="Average Number of Cases")+theme_light()+theme(legend.position = "bottom")
 ```
 
 ```{r}
@@ -72,7 +91,7 @@ COVID_Deaths_long %>%
   summarise(total_deaths=sum(Deaths, na.rm = T)) %>% 
   arrange(-total_deaths) %>% 
 top_n(10, total_deaths) %>%
-  ggplot(aes(x=reorder(State, total_deaths), y=total_deaths, fill = State))+geom_col()+theme(axis.text.x = element_text(angle = 0, hjust = 0.4))+coord_flip()+labs(title = "COVID-19 Cases in the Ten Most Affected States", x="Time", y="Average Cases")
+  ggplot(aes(x=reorder(State, total_deaths), y=total_deaths, fill = State))+geom_col()+theme(axis.text.x = element_text(angle = 0, hjust = 0.4))+coord_flip()+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Cases")
 ```
 
 
@@ -94,6 +113,53 @@ COVID_Deaths_long %>%
 ```
 
 ```{r}
+COVID_Cases_cleanlong <- COVID_Cases_long %>% 
+  separate(Date, into = c("X", "Year", "Month", "Day"), sep = ".") %>% 
+   mutate(date_clean = sub("X", "", Date)) %>%
+  separate(date_clean, into = c("Year", "Month", "Day"), sep = ".")
+```
+
+```{r}
+COVID_Cases_cleanlong <- COVID_Cases_long %>%
+  mutate(Date = sub("^X", "", Date)) %>%  # Remove the leading "X"
+  separate(Date, into = c("Year", "Month", "Day"), sep = "\\.")  # Use "\\." to escape the dot
+```
+  
+```{r}
+COVID_Cases_cleanlong %>% 
+  group_by(State, Year) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
+  summarise(total_affected=sum(Cases, na.rm = T), .groups = "keep") %>% 
+
+  ggplot(aes(x=Year, y=total_affected, group = State, colour = State))+geom_line(size=0.5)+labs(title = "Total COVID-19 Cases by States (2020-2023)", x="Year", y="Total Cases")+theme_light()+theme(legend.position = "bottom")
+```
+
+```{r}
+COVID_Cases_cleanlong %>% 
+  group_by(State) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
+  summarise(total_affected=sum(Cases, na.rm = T), .groups = "keep") %>% 
+
+  ggplot(aes(x=reorder(State, total_affected)
+               , y=total_affected, group = State, fill = State))+geom_col()+labs(title = "Total COVID-19 Cases by States (2020-2023)", x="Year", y="Total Cases")+theme_light()+theme(legend.position = "bottom")
+```
+
+```{r}
+COVID_Cases_cleanlong %>% 
+  group_by(State, Month) %>% 
+  filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="PA") %>% 
+  summarise(total_affected=sum(Cases, na.rm = T), .groups = "keep") %>% 
+
+  ggplot(aes(x=Month, y=total_affected, group = State, colour = State))+geom_line(size=0.5)+labs(title = "Total COVID-19 Cases by Months (2020-2023) by States", x="Month", y="Average Cases")+theme_light()+theme(legend.position = "bottom")
+```
+
+
+
+
+
+
+
+```{r}
 COVID_Deaths_long %>% 
   group_by(State, Date) %>% 
   filter(State=="CA"|State=="TX"|State=="FL"|State=="NY"|State=="IL"|State=="PA"|State=="OH"|State=="NC"|State=="MI"|State=="NJ") %>% 
@@ -112,27 +178,13 @@ COVID_Deaths_long %>%
                , y=total_deaths, group = State, fill = State, colour = "black"))+geom_col(size=0.5)+labs(title = "COVID-19 Deaths in the Ten Most Affected States", x="Time", y="Average Deaths")
 ```
 
-```{r}
-COVID_Deaths_long %>% 
-  ggplot(aes(Deaths))+geom_density(fill="paleturquoise3", color="salmon", alpha=0.8)+scale_x_log10()
-```
 
-```{r}
-COVID_Deaths_long %>% 
-  ggplot(aes(Deaths))+geom_histogram(color="violetred", fill="turquoise3")+scale_x_log10()
-```
-```{r}
-COVID_Deaths_long %>% 
-  ggplot(aes(x=Deaths)) +
-  geom_histogram(aes(y = after_stat(density)), fill = "deepskyblue4", alpha = 0.4, color = "black")+
-  geom_density(color = "red")+
-  labs(title = "Distribution COVID-19 Deaths")+scale_x_log10()
-```
+
 ```{r}
 COVID_Cases_long %>% 
   ggplot(aes(x=Cases)) +
   geom_histogram(aes(y = after_stat(density)), fill = "deepskyblue4", alpha = 0.4, color = "black")+
   geom_density(color = "red")+
-  labs(title = "Distribution COVID-19 Cases")+scale_x_log10()
+  labs(title = "Distribution of COVID-19 Cases (2020-2023)", x="Cases", y="Density")+scale_x_log10()+theme_light()
 ```
 

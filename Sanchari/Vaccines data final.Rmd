@@ -123,15 +123,15 @@ COVID_vaccines_new %>%
          start_date = mdy(start_date)) %>%  # Convert to Date using 'lubridate'
   group_by(start_date, Geography) %>%  # Group by both start_date and Geography
   summarise(Sample.Size = sum(Sample.Size)) %>%  # Summing Sample.Size for each date and geography
-  ggplot(aes(x = start_date, y = Sample.Size, color = Geography)) +  # Map Geography to color
+  ggplot(aes(x = start_date, y = Sample.Size, color = Geography)) +  
   geom_line() +
   labs(title = "COVID-19 Non-Vaccinated Population Over Time by State",
        x = "Date", y = "Sample Size") +
   theme_minimal() +
-  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +  # Format the x-axis to show month and year
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +  
   scale_color_brewer(palette = "Paired") +  # Apply the "Paired" color palette
   theme(legend.position = "bottom", 
-        axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels to prevent crowding
+        axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
 ```{r}
 COVID_vaccines_new %>%
@@ -150,7 +150,7 @@ COVID_vaccines_new %>%
   labs(title = "Total COVID-19 Vaccinated Population in the U.S (2021-2023)",
        x = "Date", y = "Sample Size") +
   theme_minimal() +
-  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +  # Format the x-axis to show month and year
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +  
   theme(legend.position = "bottom", 
         axis.text.x = element_text(angle = 45, hjust = 1))
 ```

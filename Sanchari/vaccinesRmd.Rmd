@@ -18,21 +18,26 @@ When you click the **Knit** button a document will be generated that includes bo
 library(tidyverse)
 library(janitor)
 library(naniar)
+
+```
+```{r}
+library(scales)
+options(scipen=999)
 ```
 
 ## Including Plots
 
 ```{r pressure, echo=FALSE}
-COVID_vaccines <- read.csv("/Users/sanch/Desktop/BIS15W2025_group13/Sanchari/National_Immunization_Survey_Adult_COVID_Module__NIS-ACM___Vaccination_Status_and_Intent_by_Demographics.csv")
+COVID_vaccines <- read.csv("/Users/sanch/Desktop/National_Immunization_Survey_Adult_COVID_Module__NIS-ACM___Vaccination_Status_and_Intent_by_Demographics copy.csv")
 ```
 
 ```{r}
-summary(COVID_vaccines)
+
 ```
 
 ```{r}
-COVID_vaccines %>% 
-  count(Indicator.Category)
+COVID_vaccines%>% 
+  count(Year)
 ```
 
 ```{r}
@@ -47,14 +52,7 @@ COVID_vaccines %>%
  arrange(total_sample_size)
 ```
 ```{r}
-COVID_vaccines %>% 
-  group_by(Geography) %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
 
-  filter(Geography=="Texas"| Geography=="Tennessee") %>% 
-
-  summarise(total_sample_size=sum(Sample.Size)) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()+labs(title = "Vaccines Between the Most and Least States That don't want to get Vaccinated")
 ```
 
 ```{r}
@@ -66,20 +64,6 @@ COVID_vaccines %>%
  arrange(-total_sample_size)
 ```
 
-```{r}
-COVID_vaccines %>% 
-  group_by(Geography) %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
-  filter(Geography!="National") %>% 
-  summarise(total_sample_size=sum(Sample.Size)) %>% 
- arrange(-total_sample_size) %>% 
-  top_n(10, total_sample_size) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "Top 10 States that Probably or Definitely Will Not Get Vaccinated")
-```
-
-```{r}
-
-```
 
 ```{r}
  COVID_vaccines %>% 
@@ -92,23 +76,7 @@ COVID_vaccines %>%
   top_n(10, total_sample_size) %>% 
   ggplot(aes(x=Geography, y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "Top 10 States that have been Vaccinated")
 ```
-```{r}
-COVID_vaccines %>% 
-  group_by(Geography) %>% 
-  filter(Geography=="California"|Geography=="Texas"|Geography=="Florida"|Geography=="New York"|Geography=="Illinois"|Geography=="Pennsylvania"|Geography=="Ohio"|Geography=="North Carolina"|Geography=="Michigan"|Geography=="New Jersey") %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
-  summarise(total_sample_size=sum(Sample.Size)) %>%
-  ggplot(aes(x=reorder(Geography, total_sample_size)
-               , y=total_sample_size, group = Geography, fill = Geography))+geom_col()+labs(title = "COVID-19 Vaccines in the Ten States with Most Deaths", x="States", y="People taken the vaccines")+coord_flip()
-```
-```{r}
-COVID_vaccines %>% 
-  group_by(Geography) %>% 
-  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
-  filter(Geography=="California"| Geography=="South Dakota") %>% 
-  summarise(total_sample_size=sum(Sample.Size)) %>% 
-  ggplot(aes(x=Geography, y=total_sample_size))+ geom_col(fill="violet", alpha=0.5)+scale_y_log10()+labs(title = "COVID-19 vaccines Between States with Least and Most Deaths")
-```
+
 
 ```{r}
 states <- COVID_vaccines %>% 
@@ -118,5 +86,178 @@ states <- COVID_vaccines %>%
 ```{r}
 COVID_vaccines %>% 
   count(Indicator.Category)
+```
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category== "Definitely will get an updated bivalent booster (among adults who completed primary series)"| Indicator.Category== "Vaccinated (>=1 dose)" 	| Indicator.Category=="Received updated bivalent booster dose (among adults who completed primary series)"
+         ) %>% 
+  filter(Geography=="California"|Geography=="Texas"|Geography=="NY-Rest of State"|Geography=="NY-City of New York"| Geography=="Florida"|Geography=="Pennsylvania") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>%  
+ arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size) %>% 
+  ggplot(aes(x=reorder(Geography, total_sample_size)
+               , y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "COVID-19 Vaccinated Population by State", X="State", y="Number of People Vaccinated", x="State")+theme_light()+theme(legend.position = "bottom")
+
+```
+
+```{r}
+
+```
+
+```{r}
+COVID_vaccines %>% 
+  group_by(Geography) %>% 
+  filter(Geography=="California"|Geography=="Texas"|Geography=="NY-Rest of State"|Geography=="NY-City of New York"| Geography=="Florida"|Geography=="Pennsylvania") %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+  ggplot(aes(x=reorder(Geography, total_sample_size)
+               , y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "COVID-19 Non-Vaccinated Population by State", x="State", y="Number of People Not Vaccinate")+theme_light()+theme(legend.position = "bottom")
+```
+```{r}
+COVID_vaccines_new <- COVID_vaccines%>%
+   mutate(Geography = ifelse(Geography %in% c("NY-Rest of State", "NY-City of New York"), 
+                            "New York", Geography)) 
+```
+
+
+```{r}
+COVID_vaccines_new %>% 
+  group_by(Geography) %>% 
+  filter(Geography=="California"|Geography=="Texas"|Geography=="New York"| Geography=="Florida"|Geography=="Pennsylvania") %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>% 
+  ggplot(aes(x=reorder(Geography, total_sample_size)
+               , y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "COVID-19 Non-Vaccinated Population by State", x="State", y="Number of People Not Vaccinate")+theme_light()+theme(legend.position = "bottom")
+```
+```{r}
+COVID_vaccines_new %>% 
+  group_by(Geography) %>% 
+  filter(Indicator.Category== "Definitely will get an updated bivalent booster (among adults who completed primary series)"| Indicator.Category== "Vaccinated (>=1 dose)" 	| Indicator.Category=="Received updated bivalent booster dose (among adults who completed primary series)"
+         ) %>% 
+  filter(Geography=="California"|Geography=="Texas"|Geography=="New York"| Geography=="Florida"|Geography=="Pennsylvania") %>% 
+  filter(Geography!="National") %>% 
+  summarise(total_sample_size=sum(Sample.Size)) %>%  
+ arrange(-total_sample_size) %>% 
+  top_n(10, total_sample_size) %>% 
+  ggplot(aes(x=reorder(Geography, total_sample_size)
+               , y=total_sample_size, fill=Geography))+geom_col()+coord_flip()+labs(title = "COVID-19 Vaccinated Population by State", X="State", y="Number of People Vaccinated", x="State")+theme_light()+theme(legend.position = "bottom")
+```
+
+```{r}
+COVID_vaccines_clean <- COVID_vaccines_new %>% 
+  separate(Time.Period, into = c("Start", "End"), sep = " -") %>%
+  
+  # Step 2: Separate Start into Start_Month and Start_Day
+  separate(Start, into = c("Start_Month", "Start_Day"), sep = " ") %>%
+  
+  # Step 3: Separate End into End_Month and End_Day
+  mutate(End = str_trim(End)) %>% 
+  separate(End, into = c("End_Month", "End_Day"), sep = " ")
+
+```
+
+```{r}
+COVID_vaccines_clean %>%
+  group_by(Start_Month, Geography) %>% 
+  filter(Indicator.Category == "Definitely will get an updated bivalent booster (among adults who completed primary series)" | 
+         Indicator.Category == "Vaccinated (>=1 dose)" | 
+         Indicator.Category == "Received updated bivalent booster dose (among adults who completed primary series)") %>% 
+  filter(Geography %in% c("California", "Texas", "New York", "Florida", "Pennsylvania")) %>% 
+  filter(Geography != "National") %>% 
+  summarise(total_sample_size = sum(Sample.Size, na.rm = TRUE)) %>% 
+  mutate(Start_Month = factor(Start_Month, 
+                              levels = c("January", "February", "March", "April", "May", "June", "July", 
+                                         "August", "September", "October", "November", "December"))) %>% # Ensures month order
+  arrange(Start_Month) %>% 
+  ggplot(aes(x = Start_Month, 
+             y = total_sample_size, 
+             color = Geography, # Different line for each state
+             group = Geography)) +
+  geom_line() + 
+  geom_point() +  # Add points at each month
+  labs(title = "COVID-19 Vaccinated Population by Month and State (2021-2023)", 
+       x = "Month", 
+       y = "Number of People Vaccinated") +
+  theme_light() + 
+  theme(legend.position = "bottom")
+
+
+```
+```{r}
+COVID_vaccines_clean %>%
+  group_by(Start_Month, Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>%
+  filter(Geography %in% c("California", "Texas", "New York", "Florida", "Pennsylvania")) %>% 
+  filter(Geography != "National") %>% 
+  summarise(total_sample_size = sum(Sample.Size, na.rm = TRUE)) %>% 
+  mutate(Start_Month = factor(Start_Month, 
+                              levels = c("January", "February", "March", "April", "May", "June", "July", 
+                                         "August", "September", "October", "November", "December"))) %>% # Ensures month order
+  arrange(Start_Month) %>% 
+  ggplot(aes(x = Start_Month, 
+             y = total_sample_size, 
+             color = Geography, # Different line for each state
+             group = Geography)) +
+  geom_line() + 
+  geom_point() +  # Add points at each month
+  labs(title = "COVID-19 Non-Vaccinated Population by Month and State (2021-2023)", 
+       x = "Month", 
+       y = "Number of People not Vaccinated") +
+  theme_light() + 
+  theme(legend.position = "bottom")
+```
+
+```{r}
+COVID_vaccines_clean %>%
+  group_by(Year, Geography) %>% 
+ filter(Indicator.Category == "Definitely will get an updated bivalent booster (among adults who completed primary series)" | 
+         Indicator.Category == "Vaccinated (>=1 dose)" | 
+         Indicator.Category == "Received updated bivalent booster dose (among adults who completed primary series)") %>% 
+  filter(Geography %in% c("California", "Texas", "New York", "Florida", "Pennsylvania")) %>% 
+  filter(Geography != "National") %>% 
+  summarise(total_sample_size = sum(Sample.Size, na.rm = TRUE)) %>% 
+#  mutate(Start_Month = factor(Start_Month, 
+                              #levels = c("January", "February", "March", "April", "May", "June", "July", 
+                                         #"August", "September", "October", "November", "December"))) %>% # Ensures month order
+  #arrange(Start_Month) %>% 
+  ggplot(aes(x = Year, 
+             y = total_sample_size, 
+             color = Geography, # Different line for each state
+             group = Geography)) +
+  geom_line() + 
+  geom_point() +  # Add points at each month
+  labs(title = "COVID-19 Vaccinated Population by Year and State (2021-2023)", 
+       x = "Month", 
+       y = "Number of People Vaccinated") +
+  theme_light() + 
+  theme(legend.position = "bottom")+ scale_x_continuous(breaks = seq(min(COVID_vaccines_clean$Year), max(COVID_vaccines_clean$Year), by = 1))
+```
+
+```{r}
+COVID_vaccines_clean %>%
+  group_by(Year, Geography) %>% 
+  filter(Indicator.Category=="Probably or Definitely Will Not Get Vaccinated") %>%
+  filter(Geography %in% c("California", "Texas", "New York", "Florida", "Pennsylvania")) %>% 
+  filter(Geography != "National") %>% 
+  summarise(total_sample_size = sum(Sample.Size, na.rm = TRUE)) %>% 
+#  mutate(Start_Month = factor(Start_Month, 
+                              #levels = c("January", "February", "March", "April", "May", "June", "July", 
+                                         #"August", "September", "October", "November", "December"))) %>% # Ensures month order
+  #arrange(Start_Month) %>% 
+  ggplot(aes(x = Year, 
+             y = total_sample_size, 
+             color = Geography, # Different line for each state
+             group = Geography)) +
+  geom_line() + 
+  geom_point() +  # Add points at each month
+  labs(title = "COVID-19 Non-Vaccinated Population by Year and State (2021-2023)", 
+       x = "Month", 
+       y = "Number of People not Vaccinated") +
+  theme_light() + 
+  theme(legend.position = "bottom")+ scale_x_continuous(breaks = seq(min(COVID_vaccines_clean$Year), max(COVID_vaccines_clean$Year), by = 1))
 ```
 

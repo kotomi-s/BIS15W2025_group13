@@ -22,10 +22,6 @@ Weekly <- read_csv("/Users/stephanie/Desktop/BIS15W2025_group13/Stephanie/Weekly
 ```
 
 
-
-
-
-
 ##NEW CASES
 
 #Created new data set for the 5 states. Cleaned names and dates.
